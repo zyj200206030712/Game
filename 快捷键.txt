@@ -1,0 +1,14 @@
+ctrl + +/—：缩放整个页面
+crtl + 鼠标滚轮：缩放代码页面
+ctrl + ,：设置
+ctrl + shift + p：命令面板
+ctrl + shift + f：项目内搜索
+ctrl + `：打开/关闭终端
+Pylance：Python语言服务器，支持代码补全、错误提示、排版优化
+折叠所有：Ctrl+K+0
+展开所有：Ctrl+K+J
+折叠选中块：Ctrl+Shift+[
+展开选中块：Ctrl+Shift+]
+F5：启动调试
+shift + F5：停止调试
+
