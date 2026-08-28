@@ -1,4 +1,4 @@
-# battle.py  专门负责战斗核心逻辑与回合结算
+# battle.py  专门负责战斗核心逻辑与回合结算,zyj
 import random
 from config import *
 from ui import FloatingText
