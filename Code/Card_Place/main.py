@@ -1,4 +1,4 @@
-# main.py  主程序的入口，负责场景流转、事件监听和整体渲染
+# main.py  主程序的入口，负责场景显示、事件监听和整体渲染
 
 import pygame
 import sys

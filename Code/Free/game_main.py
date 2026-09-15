@@ -3,6 +3,7 @@
 import sys
 import os
 import warnings
+from pathlib import Path
 # 忽略特定的警告
 warnings.filterwarnings('ignore', category=UserWarning, message='.*pkg_resources.*')
 warnings.filterwarnings('ignore', category=UserWarning, message='.*iCCP.*')
@@ -13,6 +14,10 @@ import battle
 import data
 from battle import identity_LEVELS, Character_battle_data, calculate_stats_by_level, VideoPlayer
 from data import get_location_character_map, Location_background_map, Background_file_map
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PICTURE_DIR = PROJECT_ROOT / "picture"
 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 900
@@ -1073,7 +1078,7 @@ class BattleScene(Scene):
                 'hunliang': int(stats_bw.get('魂量')),
                 'skills': base_stats_wdsj.get('skills', []),
                 'identity': identity,
-                'image_path': f"picture/{name}.png",
+                'image_path': str(PICTURE_DIR / data.Character_data.get(name, {}).get('image_file', f"{name}.png")),
                 'level': level
             }
             transformed_team.append(transformed_member)
@@ -1084,16 +1089,11 @@ class BattleScene(Scene):
         enemy_data_wdsj = self._transform_team_data(self.enemy_team_bw)
 
         print("开始战斗模块...")
-        original_cwd = os.getcwd()
         try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            parent_dir = os.path.dirname(script_dir)
-            os.chdir(parent_dir)
             battle.main_gui(player_data_wdsj, enemy_data_wdsj)
         except Exception as e:
             print(f"An error occurred while calling the battle logic: {e}")
         finally:
-            os.chdir(original_cwd)
             print("战斗结束，返回...")
             pygame.init()
             self.game.screen = pygame.display.set_mode((self.game.width, self.game.height), pygame.RESIZABLE)
@@ -1133,15 +1133,11 @@ class Game:
             self.small_font = pygame.font.Font(None, 24)
 
         try:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            base_dir = os.path.dirname(script_dir)
-            pic_path = os.path.join(base_dir, "picture")
-
             # 背景图片读入
             for attr_name, filename in Background_file_map.items():
-                image_path = os.path.join(pic_path, filename)
+                image_path = PICTURE_DIR / filename
                 try:
-                    self.background_images[attr_name] = pygame.image.load(image_path).convert()
+                    self.background_images[attr_name] = pygame.image.load(str(image_path)).convert()
                 except pygame.error as e:
                     print(f"警告: 无法加载背景图片 '{filename}' at '{image_path}'. {e}")
 
@@ -1154,19 +1150,19 @@ class Game:
                 video_file = f"{char_name}.mp4"
                 image_file = char_info.get("image_file", f"{char_name}.png")
                 
-                video_path = os.path.join(pic_path, video_file)
-                image_path = os.path.join(pic_path, image_file)
+                video_path = PICTURE_DIR / video_file
+                image_path = PICTURE_DIR / image_file
 
                 # 优先检查是否存在同名 MP4
-                if os.path.exists(video_path):
+                if video_path.exists():
                     # 暂时不初始化 VideoPlayer，因为不知道具体显示尺寸
                     # 我们存储路径，在具体显示类中初始化
-                    self.character_videos[char_name] = video_path
+                    self.character_videos[char_name] = str(video_path)
                     print(f"检测到视频资源: {video_file}")
                     
                 # 无论是否有视频，都加载图片作为占位符或回退方案
                 try:
-                    self.character_images[char_name] = pygame.image.load(image_path).convert_alpha()
+                    self.character_images[char_name] = pygame.image.load(str(image_path)).convert_alpha()
                 except pygame.error:
                     print(f"Warning: Could not load image for '{char_name}' at '{image_path}'. Using placeholder.")
                     placeholder = pygame.Surface((120, 160))
@@ -1175,7 +1171,7 @@ class Game:
 
         except (pygame.error, FileNotFoundError) as e:
             print(
-                f"Error: Could not load resources. Ensure 'picture' directory is in the parent directory. {e}")
+                f"Error: Could not load resources from '{PICTURE_DIR}'. {e}")
             sys.exit()
 
     def change_scene(self, new_scene):

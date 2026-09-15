@@ -1,9 +1,13 @@
 # 战斗模块
 
 import pygame  # 游戏开发
-import os  # 处理文件和目录路径
+from pathlib import Path
 from data import define_skills, Character_battle_data, Skill  # 导入技能实例和角色实例
 import cv2
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PICTURE_DIR = PROJECT_ROOT / "picture"
+EFFECTS_DIR = PROJECT_ROOT / "effects"
 
 PLAYER_COLOR = (0, 200, 0)  # 玩家阵营颜色（绿色）
 ENEMY_COLOR = (255, 50, 50)  # 敌人阵营颜色（红色）
@@ -258,10 +262,9 @@ class Card:
         self.is_selected = False  # 卡牌是否被选中（用于行动规划）
         self.is_targetable = False  # 卡牌是否是当前技能的可选目标
 
-        # 寻找视频文件 (根据你的目录结构调整路径)
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        video_path = os.path.join(base_dir, "picture", f"{self.character.name}.mp4")
-        self.video_path = video_path if os.path.exists(video_path) else None
+        # 从项目根目录的 picture 文件夹寻找角色视频
+        video_path = PICTURE_DIR / f"{self.character.name}.mp4"
+        self.video_path = str(video_path) if video_path.exists() else None
         self.video_player = None
 
     # 在屏幕上绘制卡牌，self指Card类实例
@@ -372,15 +375,8 @@ def main_gui(player_data, enemy_data):
     pygame.display.set_caption("我的世界 - 战斗")  # 设置窗口标题
     clock = pygame.time.Clock()  # 创建一个时钟对象来控制帧率
     try:  # 尝试加载资源文件
-        # 获取 battle.py 脚本所在的 '.../Game/Code' 目录
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        # 获取 '.../Game' 目录
-        base_dir = os.path.dirname(script_dir)
-        # 拼接出 '.../Game/picture' 的正确路径
-        pic_path = os.path.join(base_dir, "picture")
-
-        # 使用动态计算出的正确路径加载背景图片
-        background_image_original = pygame.image.load(os.path.join(pic_path, "background_gold.png")).convert()
+        # 使用项目根目录下的固定资源路径加载战斗背景
+        background_image_original = pygame.image.load(str(PICTURE_DIR / "background_gold.png")).convert()
 
         font_big = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 50)  # 加载大号字体（用于标题）
         font_log = pygame.font.Font("C:/Windows/Fonts/msyh.ttc", 16)  # 加载小号字体（用于战斗日志）
@@ -1230,12 +1226,12 @@ class SkillEffect(pygame.sprite.Sprite):
 
     # 加载技能动画帧的函数
     def load_frames(self, asset_name, size):
-        path = f"effects/{asset_name}/"  # 构建特效帧所在的文件夹路径
+        effect_dir = EFFECTS_DIR / asset_name  # 构建特效帧所在的文件夹路径
         i = 1  # 从第一帧开始查找
         while True:  # 无限循环，直到找不到新的帧
-            filename = f"{path}frame_{i}.png"  # 构建当前帧的文件名
+            filename = effect_dir / f"frame_{i}.png"  # 构建当前帧的文件名
             try:  # 尝试加载
-                frame = pygame.image.load(filename).convert_alpha()  # 加载图片并保留透明通道
+                frame = pygame.image.load(str(filename)).convert_alpha()  # 加载图片并保留透明通道
                 self.frames.append(pygame.transform.scale(frame, size))  # 缩放到指定尺寸并添加到帧列表
                 i += 1  # 帧数加一，准备加载下一帧
             except (pygame.error, FileNotFoundError):  # 如果加载失败或文件不存在

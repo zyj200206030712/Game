@@ -1,4 +1,5 @@
 # models.py  存放游戏核心数据结构（角色类 Character、存档与数据类 GameData）
+# 负责角色属性计算、战斗状态、关卡生成和 JSON 存档管理
 import json
 from pathlib import Path
 from config import HERO_CONFIG, STAGE_CONFIG
