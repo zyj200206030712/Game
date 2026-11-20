@@ -1,18 +1,28 @@
 # battle.py  专门负责战斗核心逻辑与回合结算,zyj
 import random
+from dataclasses import dataclass, field
 from config import *
 from ui import FloatingText
 
 def get_support_effect_value(multiplier, actor_value, target_value):
     return round(multiplier * (0.5 * actor_value + 0.5 * target_value))
 
-def get_battle_card_center(slot, is_enemy, offset_x=0, offset_y=0):
-    if is_enemy:
-        x_pos = WIDTH - 330 + (slot // 3) * 150
-    else:
-        x_pos = 40 + (1 - (slot // 3)) * 150
-    y_pos = 130 + (slot % 3) * 225
-    return x_pos + offset_x + 65, y_pos + offset_y + 75
+@dataclass
+class BattleAction:
+    # 记录这次已结算行动的演出信息，保留原有数值和随机调用顺序。
+    actor: tuple
+    skill: str = ""
+    targets: list = field(default_factory=list)
+    hits: set = field(default_factory=set)
+    controlled: bool = False
+    # 随行动保存当次释放的技能说明，供演出悬停时查看。
+    skill_description: str = ""
+
+
+def effect_position(slot, is_enemy):
+    x, y = battle_position(slot, is_enemy)
+    return x, y - 106
+
 
 def can_cast_skill_next_turn(character):
     return bool(character and character.current_hp > 0 and character.skills and any(cd <= 1 for cd in character.current_cds))
@@ -35,13 +45,15 @@ def process_turn(game, combat_log, floating_texts):
     执行一个战斗回合动作。
     自动检测攻击方、目标方，处理伤害、回血、Buff及控制结算，并返回日志。
     """
+    action = None
+    game.current_attacker = game.current_target = None
     acted = False
     max_slots = max(len(game.deployed_party), len(game.enemy_party))
     total_actions_per_round = max_slots * 2
     
     while not acted:
         # 判断是否某一方全灭
-        if not any(e.current_hp > 0 for e in game.enemy_party) or not any(h and h.current_hp > 0 for h in game.deployed_party):
+        if not any(e and e.current_hp > 0 for e in game.enemy_party) or not any(h and h.current_hp > 0 for h in game.deployed_party):
             break
         
         # 【关键修复】将回合判定移入循环内部，且在 turn_counter 递增之前
@@ -81,10 +93,7 @@ def process_turn(game, combat_log, floating_texts):
         if actor and actor.current_hp > 0:
             actor.current_cds = [max(0, cd - 1) for cd in actor.current_cds]
 
-            # 【新增】判断攻击方向：我方向右(+1)，敌方向左(-1)
-            direction = 1 if not is_enemy else -1
-            # 【新增】行动开始时，施加攻击突进的位移 (往前猛冲 40 像素)
-            actor.offset_x = 40 * direction
+            action = BattleAction(game.current_attacker)
 
             # 【新增】回合开始时，减少免控回合数
             if actor.immune_turns > 0:
@@ -92,6 +101,7 @@ def process_turn(game, combat_log, floating_texts):
             
             # 结算控制
             if actor.stun_turns > 0:
+                action.controlled = True
                 actor.stun_turns -= 1
                 combat_log.append([
                     (f"> {faction_label}", actor_faction_color), 
@@ -103,6 +113,8 @@ def process_turn(game, combat_log, floating_texts):
                 # 技能释放判定
                 skill_idx, skill = get_castable_skill(actor)
                 if skill:
+                    action.skill = skill["name"]
+                    action.skill_description = skill.get("desc", "")
                     actor.current_cds[skill_idx] = skill.get("cooldown", 3)
                     
                     combat_log.append([
@@ -133,7 +145,7 @@ def process_turn(game, combat_log, floating_texts):
                     elif skill_target == "enemy_highest_atk" and enemy_pool:
                         # 敌方攻击最高 (擒贼擒王/针对输出)
                         real_targets = [max(enemy_pool, key=lambda x: x.atk)]
-                    elif skill_target == "enemy_higest_def" and enemy_pool:
+                    elif skill_target == "enemy_highest_def" and enemy_pool:
                         # 敌方防御最高 (魔王之盾/针对输出)
                         real_targets = [max(enemy_pool, key=lambda x: x.defense)]
                     elif skill_target == "enemy_random" and enemy_pool:
@@ -180,13 +192,10 @@ def process_turn(game, combat_log, floating_texts):
                         t_color = RED if t_is_enemy else BLUE
                         t_idx = game.enemy_party.index(t) if t_is_enemy else game.deployed_party.index(t)
                         game.current_target = ('enemy' if t_is_enemy else 'ally', t_idx)
-                        actor_fx_x, actor_fx_y = get_battle_card_center(slot, is_enemy, actor.offset_x, actor.offset_y)
+                        action.targets.append(game.current_target)
+                        actor_fx_x, actor_fx_y = effect_position(slot, is_enemy)
+                        base_x, base_y = effect_position(t_idx, t_is_enemy)
 
-                        t_col = (t_idx // 3) if t_is_enemy else (1 - (t_idx // 3))
-                        t_row = t_idx % 3
-                        base_x = (WIDTH - 330 + t_col * 150 + 65) if t_is_enemy else (40 + t_col * 150 + 65)
-                        base_y = 130 + t_row * 225 + 75
-                        
                         msg_parts = []
                         float_delay = 0 
                         last_damage_dealt = 0
@@ -199,9 +208,7 @@ def process_turn(game, combat_log, floating_texts):
                                 dmg = t.take_damage(round(actor.atk * mult))
                                 last_damage_dealt = dmg
                                 actor.dmg_dealt += dmg
-                                # 【新增】受击者产生后退位移 (往后退 30 像素)
-                                t_direction = 1 if t_is_enemy else -1 # 注意：这里判断目标是不是敌方
-                                t.offset_x = 30 * t_direction
+                                action.hits.add(game.current_target)
                                 msg_parts.append((f"受到 {dmg} 伤害", BLACK))
                                 floating_texts.append(FloatingText(base_x + random.randint(-15, 15), base_y + float_delay, f"-{dmg}", PURPLE))
                                 float_delay -= 25
@@ -315,13 +322,12 @@ def process_turn(game, combat_log, floating_texts):
                         actor.dmg_dealt += dmg  
                         
                         t_is_enemy = target in game.enemy_party
-                        # 【新增】受击者产生后退位移
-                        t_direction = 1 if t_is_enemy else -1
-                        target.offset_x = 30 * t_direction
                         t_color = RED if t_is_enemy else BLUE
                         t_idx = game.enemy_party.index(target) if t_is_enemy else game.deployed_party.index(target)
                         game.current_target = ('enemy' if t_is_enemy else 'ally', t_idx)
-                        
+                        action.targets.append(game.current_target)
+                        action.hits.add(game.current_target)
+
                         combat_log.append([
                             (f"> {faction_label}", actor_faction_color), (actor.name, actor_color), (" 普攻 ", BLACK), 
                             (target.name, t_color), (f" 造成 {dmg} 伤害！", BLACK)
@@ -330,13 +336,10 @@ def process_turn(game, combat_log, floating_texts):
                         if target.current_hp <= 0:
                             combat_log.append([("  [击杀] ", RED), (target.name, t_color), (" 阵亡了！", DARK_GRAY)])
                         
-                        t_col = (t_idx // 3) if t_is_enemy else (1 - (t_idx // 3))
-                        t_row = t_idx % 3
-                        base_x = (WIDTH - 330 + t_col * 150 + 65) if t_is_enemy else (40 + t_col * 150 + 65)
-                        base_y = 130 + t_row * 225 + 75 
+                        base_x, base_y = effect_position(t_idx, t_is_enemy)
                         floating_texts.append(FloatingText(base_x + random.randint(-15, 15), base_y, f"-{dmg}", BLACK))
                 
                 acted = True
 
     refresh_skill_ready_highlights(game)
-
+    return action

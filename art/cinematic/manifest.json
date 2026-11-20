@@ -1,0 +1,1713 @@
+[
+  {
+    "name": "安迷修",
+    "key": "hero_00",
+    "source": "picture/安迷修铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Fully enclosed peaked silver helmet with long pointed crest, dark barred faceplate, no exposed human face or hair. Intricate dark silver and purple plate armor, curled scroll filigree, purple inset panels, heavy pauldrons. Preserve these exact armor shapes.",
+    "skills": {
+      "name": "紫鳞刺",
+      "target": "enemy_highest_atk",
+      "cooldown": 3,
+      "desc": "发动刺击，降低敌方攻击最高的单体：安迷修与目标各50%攻击力混合后30%的攻击值",
+      "effects": [
+        {
+          "type": "debuff",
+          "stat": "atk",
+          "multiplier": 0.3
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_00.png",
+    "atlas": "poses/hero_00.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "dbab5ac7aa7f310063a47dd130f219f9943a88a2ac9cd251bbcad37610fd4326",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "3ccfc49ec0ca07e159108640b18cbf665bbabfd291f1bcb1b890a0ff20e9bfd5"
+  },
+  {
+    "name": "暗魂",
+    "key": "hero_01",
+    "source": "picture/暗系魂铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Young adult male, short straight BLACK hair, RED glowing eyes, BLACK ornate plate and scale armor with round sculpted pauldrons, long ragged BLACK cloak. Keep uncovered face, preserve slender silhouette and entirely black palette. No crimson cape or silver hair.",
+    "skills": {
+      "name": "暗影侵蚀",
+      "target": "enemy_higest_def",
+      "cooldown": 3,
+      "desc": "发动暗影之力，降低敌方防御力最高的单体：暗魂与目标各50%防御力混合后30%的防御值",
+      "effects": [
+        {
+          "type": "debuff",
+          "stat": "def",
+          "multiplier": 0.3
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_01.png",
+    "atlas": "poses/hero_01.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "3f5b119026fe0acc330bbccfeda87678f8a5e6bb4c359c82892406b5ae3bf41a",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "3c91d730688e45fd84801cadaed6b5d32b0019a214ce9cafb81ab383ef1e5cbf"
+  },
+  {
+    "name": "净世圣女",
+    "key": "hero_02",
+    "source": "picture/白皇铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult female in WHITE and PINK angular fitted armor, short pointed white helmet/crown leaving face visible, magenta/red gemstone long white staff, pink pointed shoulder armor, high armored white boots with pink panels. Preserve staff and pink-white palette.",
+    "skills": {
+      "name": "天降甘霖",
+      "target": "ally_aoe",
+      "cooldown": 12,
+      "desc": "洗涤一切污秽，解除我方全体的控制状态并附加2回合免控",
+      "effects": [
+        {
+          "type": "immune",
+          "duration": 2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_02.png",
+    "atlas": "poses/hero_02.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "0b11421fb451345d2660fac8fbf5a2034674b30552be46e37a44cfca2c827ad7",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "12bab2062c484e191c9d402f75974fe0e049e9dc628dfc7ea848c72d8dbf3498"
+  },
+  {
+    "name": "白骨夫人",
+    "key": "hero_03",
+    "source": "picture/白灵.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Pale adult WOMAN with long SILVER WHITE hair, ruby/red eyes, silver forehead jewel, WHITE dress, SILVER skull pauldrons and exposed skeletal bone gauntlets. Preserve delicate feminine face, white and silver palette and bone motifs. No black red dress, no invented staff.",
+    "skills": {
+      "name": "骨杀·刺",
+      "target": "enemy_back",
+      "cooldown": 2,
+      "desc": "瞬间化作骨影绕到敌方后排，对敌方后排单体造成白骨夫人200%攻击力的伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 2.0
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_03.png",
+    "atlas": "poses/hero_03.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "71e71bfcf9973a4e9c5c43ea589c9482de77af9099c73f7b6fbd4f4994ce0917",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "4818f196fc76d375692a42eabe9cb9eec4273e28c2bea8a1808f235eb47014a2"
+  },
+  {
+    "name": "冰云剑仙",
+    "key": "hero_04",
+    "source": "picture/冰系魂铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult FEMALE ice sword immortal, long SILVER WHITE hair tied high at crown, WHITE and pale icy BLUE long gown with fitted white crystalline armor, crystalline shoulder plates, translucent long icy BLUE sword. Preserve feminine identity and icy palette.",
+    "skills": {
+      "name": "万剑霜华",
+      "target": "enemy_aoe",
+      "cooldown": 4,
+      "desc": "霜华剑气席卷战场，对敌方全体造成冰云剑仙70%攻击力的冰冻剑伤",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 0.7
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_04.png",
+    "atlas": "poses/hero_04.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "0273022e6e408375fccada37efda90a2d5e1f08b6344c0feeadc3292a89e1275",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "829cd5d974fbfbbcd979cb2beed2b05c585370fe18b517f291c1834fb7d46bfd"
+  },
+  {
+    "name": "魅狐妖姬",
+    "key": "hero_05",
+    "source": "picture/妲己.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult pink fox enchantress, long pale PINK hair, pointed large fox ears, MANY fluffy pink fox tails fanning behind, pale pink delicate flowing dress and sash, pink-red eyes. Preserve ears, tail fan, face and pastel pink palette.",
+    "skills": {
+      "name": "倾城乱心",
+      "target": "enemy_aoe",
+      "cooldown": 6,
+      "desc": "睁开狐媚之眼，魅惑敌方全体1回合",
+      "effects": [
+        {
+          "type": "control",
+          "duration": 1
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_05.png",
+    "atlas": "poses/hero_05.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "4a17fa442d1d0d8c2956466bbba500e976bb33b7de67521968d0f52b81c3ff1e",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "69d603c3a43d5bb5f1b73a9b0bfd46b1d7b5396c857f6df13029a890b0edd493"
+  },
+  {
+    "name": "帝皇",
+    "key": "hero_06",
+    "source": "picture/帝皇铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Exact GOLD and BLACK full-body tokusatsu armored warrior from reference, completely enclosed angular GOLD horned helmet, no exposed face/hair, round red chest core in silver sculpted chest, geometric gold shoulders, black cape, long broad ornate sword containing multicolored circular jewels. Preserve helmet and weapon/belt design.",
+    "skills": {
+      "name": "五圣·乾坤破",
+      "target": "enemy_aoe",
+      "cooldown": 9,
+      "desc": "汇聚五圣之力，对敌方全体造成帝皇99%攻击力的毁灭性伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 0.99
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_06.png",
+    "atlas": "poses/hero_06.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "69dfc82c12515eeae5d28db1e20249b4d9b7d55e193a34bc352c89878269c4e2",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "789235e40e840ae63d2c2362c95989854705ba18be682cdb4c0e77a89498fa74"
+  },
+  {
+    "name": "五灵龙神",
+    "key": "hero_07",
+    "source": "picture/帝皇神.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Golden winged HUMANOID male deity, long pale hair in tall topknot, gold sun halo, ornate gold and dark armor, large golden translucent FEATHERED wings tipped teal, long gold-white robe, golden serpentine dragon spiraling around the body. Preserve winged human body and companion dragon.",
+    "skills": {
+      "name": "五行·八卦阵",
+      "target": "enemy_aoe",
+      "cooldown": 21,
+      "desc": "对敌方全体造成：五灵龙神50%攻击力的伤害、1回合束缚，五灵龙神与目标各50%攻击力和防御力的10%的两项属性值降低",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 0.5
+        },
+        {
+          "type": "control",
+          "duration": 1
+        },
+        {
+          "type": "debuff",
+          "stat": "atk, def",
+          "multiplier": 0.1
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_07.png",
+    "atlas": "poses/hero_07.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "2848875003b73411b38252d94313eefa30c55981a9b0fd027894d23b3545301e",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "75756798cf6aaadab194663402bb541787f283d3f8847482d5d68fe27b65ee3a"
+  },
+  {
+    "name": "毒孤博",
+    "key": "hero_08",
+    "source": "picture/毒系魂铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult man with short black hair, emerald GREEN armor, bright green skull motif on breastplate, dark green long tabard with purple poison stains, green gauntlets and boots; one hand holds a small vial emitting purple fumes. Preserve green palette and vial.",
+    "skills": {
+      "name": "紫魂毒雾",
+      "target": "enemy_aoe",
+      "cooldown": 24,
+      "desc": "布下毒雾使敌方全体中毒，降低敌方全体：毒孤博与目标各50%攻击力和防御力混合后的20%的两项属性值",
+      "effects": [
+        {
+          "type": "debuff",
+          "stat": "atk, def",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_08.png",
+    "atlas": "poses/hero_08.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "0706779f7848eb84a06301ba0c74844d10939aa08ab66685bdd18a6057547814",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "97d4336a5fadff60c13bda63e96582646f7dfe0acae8efd7c3f6d665d86a1b2c"
+  },
+  {
+    "name": "小花仙",
+    "key": "hero_09",
+    "source": "picture/粉仙子.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Young adult floral fairy WOMAN with very long pale pink/lilac hair, soft pink eyes, pale PINK and LILAC flowing long robe dress with silver-white floral embroidery, delicate silver belt, long light translucent sleeves. Keep original face and soft pastel identity, no armor or wings.",
+    "skills": {
+      "name": "繁花映血",
+      "target": "ally_aoe",
+      "cooldown": 12,
+      "desc": "唤起生命花海，为我方全体恢复：小花仙与目标各50%最大生命值混合后20%的血量",
+      "effects": [
+        {
+          "type": "heal",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_09.png",
+    "atlas": "poses/hero_09.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "4959b8dbc2b3c1d2e8e8c72c891c62c11bc7c20ea64ce4fa6e3f08859f28ec1e",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "6d5efec6eec5b6f5d9e71021e601ad7ad9d7f4871fb24bc5afd54cff4cef6376"
+  },
+  {
+    "name": "光明神王",
+    "key": "hero_10",
+    "source": "picture/光明神王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "GOLDEN fully armored winged male deity, ornate gold enclosed antlered/horned crown helmet, very large golden feathered wings, long white and gold robes and huge straight luminous gold sword held before body. Preserve imposing full gold armor and helmet.",
+    "skills": {
+      "name": "圣光·审魔斩",
+      "target": "enemy_aoe",
+      "cooldown": 4,
+      "desc": "汇聚圣光之力，对敌方全体造成光明神王70%攻击力的光属性剑伤",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 0.7
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_10.png",
+    "atlas": "poses/hero_10.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "84bec6c494aae46dc8553220d9c2c4478fe43a6e61aca5a76a2c695cbbc08469",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "b22dcb1a7228509a928a6fec0c3df5a0de9f4dd97a274e50574e515028f36696"
+  },
+  {
+    "name": "艾莎",
+    "key": "hero_11",
+    "source": "picture/寒冰界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult ice queen WOMAN with very long WHITE hair, sharp icy translucent BLUE crown, frosty blue-white translucent long gown, silver icy ornaments, pale face and red lips, icy serpentine dragon beside shoulder. Preserve queen identity and ice palette, no sword.",
+    "skills": {
+      "name": "凛冬·归寂",
+      "target": "enemy_aoe",
+      "cooldown": 18,
+      "desc": "制造寒冰领域，冰冻敌方全体3回合",
+      "effects": [
+        {
+          "type": "control",
+          "duration": 3
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_11.png",
+    "atlas": "poses/hero_11.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "82c8903ba60b4b0e7a4dec9614aa7e868416a2397e64c33dc04e3309709ab568",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "21670f42886dfb7bba4f3c4107729e6e1fa6769086e603f03acfd9ae75596ba5"
+  },
+  {
+    "name": "黑迪",
+    "key": "hero_12",
+    "source": "picture/黑暗界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Exact dark tokusatsu cosmic humanoid from reference: black and charcoal sleek bodysuit, fully enclosed sharply crested BLACK head, two large glowing white almond eyes, tiny white forehead diamond, round glowing CYAN chest orb. No human hair/face, no gold fantasy armor, no cape. Preserve iconic head and chest proportions.",
+    "skills": {
+      "name": "黑暗本源",
+      "target": "enemy_aoe",
+      "cooldown": 12,
+      "desc": "发动黑暗本源之力，降低敌方全体：黑迪与目标各50%攻击力混合后20%的攻击值",
+      "effects": [
+        {
+          "type": "debuff",
+          "stat": "atk",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_12.png",
+    "atlas": "poses/hero_12.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1064,
+      1479
+    ],
+    "portraits_sha256": "291b33b60fcecf4d352b619cc0406edcc0dff9d7670374f4eb66410bbce3cb42",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "b62dcdf1a6c5ce3f8477a603e8574dc0cdbe94da40bfbe50362a5802a2def38f"
+  },
+  {
+    "name": "黑骑女将",
+    "key": "hero_13",
+    "source": "picture/黑骑女将.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Female black armored knight with long BLACK high ponytail, black horned helmet/crown leaving face visible, RED forehead jewel and chest gems, dark dragon-head pauldrons, red scarf and split red skirt, black scale armor, thigh-high dark legwear, long steel sword. Preserve exact red black clothing.",
+    "skills": {
+      "name": "骑士战魂",
+      "target": "enemy_highest_hp",
+      "cooldown": 3,
+      "desc": "燃烧灵魂进入战斗状态，对敌方血量百分比最高的目标造成黑骑女将300%攻击力的伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 3.0
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_13.png",
+    "atlas": "poses/hero_13.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "3dea4c36fb8aec7b1b3ac0b146eda168f10adb622c01d880ba178ab1e2d19c25",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "980119eaa56f64202e37e2ed2859122d93bae7083b3ee8589349086c7afe2b76"
+  },
+  {
+    "name": "极光神使",
+    "key": "hero_14",
+    "source": "picture/极光界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Male divine warrior with short pale BLUE hair, blue forehead gem, intricate GOLD armor with luminous CYAN breastplate, enormous rainbow multicolored wings, circular radiant halo, long blue-white luminous sword. Preserve multicolor wings and cyan/gold armor.",
+    "skills": {
+      "name": "极光之辉",
+      "target": "ally_aoe",
+      "cooldown": 12,
+      "desc": "召唤极光星辰之力，提升我方全体：极光神使与目标各50%攻击力混合后20%的攻击值",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_14.png",
+    "atlas": "poses/hero_14.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "ac025a971a1d25c73cbbce285a52d2f984caa7a26cfc5c69ea0a9fcfb4589bc4",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "76784b6f92c03fb428c7c6210c5dd19bf7cc9a9c2f0def9f0cab0cc1f74f9461"
+  },
+  {
+    "name": "精灵公主",
+    "key": "hero_15",
+    "source": "picture/精灵公主.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Female elf ARCHER with brown long hair, pointed ears, silver leaf crown with large BLUE jewel, ornate SILVER breastplate and shoulders, dark EMERALD velvet long dress/cape, silver gauntlets, ornate dark BOW with blue gems and an arrow. Preserve bow and brown hair; no staff or blonde hair.",
+    "skills": {
+      "name": "森之箭",
+      "target": "enemy_front",
+      "cooldown": 1,
+      "desc": "射出箭矢，对敌方前排单体目标造成精灵公主199%攻击力的伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 1.99
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_15.png",
+    "atlas": "poses/hero_15.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "8a32ea2334b16c10479fc3cde2939edd4acc99fb2ea9f3e3f841b4d3322e2457",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "60b9ba4cd02bdf2b3bb9744f2bef4bfa2a5c0853858acdca7d3d5b4ee099ea3e"
+  },
+  {
+    "name": "巨甲象",
+    "key": "hero_16",
+    "source": "picture/巨甲象灵.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Heavy gray ELEPHANT with natural gray skin, large curved ivory tusks, enormous coarse dark gray stone/rock plates and jagged spikes on back and legs. Preserve rugged gray stone armor, trunk, tusks, small ears and four legs. No gold metal armor or red cloth.",
+    "skills": {
+      "name": "不屈意志",
+      "target": "self",
+      "cooldown": 5,
+      "desc": "唤醒古山之志，恢复自身：巨甲象与目标各50%最大生命值混合后50%的血量",
+      "effects": [
+        {
+          "type": "heal",
+          "multiplier": 0.5
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_16.png",
+    "atlas": "poses/hero_16.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1199,
+      1312
+    ],
+    "portraits_sha256": "95a47f0ad213d72a3592e8abbb255cedbcc581c8870f2f14291b75acc7db687e",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "d530777e9fc59c5a36d2f2964e1cf5e79a31ecc0c5389088da6b4f5ad4988bbb"
+  },
+  {
+    "name": "巨爪熊",
+    "key": "hero_17",
+    "source": "picture/巨爪熊.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Large fierce black/brown BEAR, dense dark fur, rounded ears, red glowing eyes, massive long pale claws, roaring fanged mouth. Natural animal anatomy, no armor, cape or humanoid body.",
+    "skills": {
+      "name": "蛮熊震怒",
+      "target": "self",
+      "cooldown": 4,
+      "desc": "进入红眼暴走状态，提升自身20%的攻击力和防御力",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk, def",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_17.png",
+    "atlas": "poses/hero_17.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "ae2e1ef0bffdcdd7eb64d50c0046af8417535320360ee9529741e2824ad19f85",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "1851aef77f59882923b2b7d7571b77a4a39bf5d98699f0dbb85db0392ab56b66"
+  },
+  {
+    "name": "库忿斯",
+    "key": "hero_18",
+    "source": "picture/库忿斯铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Fully enclosed demon armored warrior, curved vivid GREEN horns, green angular glowing helmet face lines, green chest and pauldrons, dark red black plate armor, intense RED flame aura behind. Keep helmet completely closed, preserve red/green silhouette and motifs.",
+    "skills": {
+      "name": "地狱之血",
+      "target": "self",
+      "cooldown": 10,
+      "desc": "燃烧精血，提升自身50%的攻击力和防御力",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk, def",
+          "multiplier": 0.5
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_18.png",
+    "atlas": "poses/hero_18.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "8b5face26dcdc7a0a7c4e787443542f8443448295a8d9310a222140fe882fa3a",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "7d69a4c008f0e3d472997dfcd8fb21fcea271683091c897ed13e454ecbed6ced"
+  },
+  {
+    "name": "傀儡女王",
+    "key": "hero_19",
+    "source": "picture/傀儡界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Pale ghostly adult WOMAN with extremely long WHITE hair, red eyes, pale forehead, thin WHITE floating halo, fitted WHITE bodysuit with gray angular trim, white thigh-high boots, long pale translucent trailing cloth/ghostly tendrils. Preserve monochrome white-gray identity and halo; no violet hair or dress or gold crown.",
+    "skills": {
+      "name": "幽冥·瞬狱杀",
+      "target": "enemy_lowest_hp",
+      "cooldown": 1,
+      "desc": "召唤傀儡，对敌方血量百分比最低的单体造成傀儡女王100%攻击力的致命打击",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 1.0
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_19.png",
+    "atlas": "poses/hero_19.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "8a2531e61f53a4add6c00531dd4ec7c30488dc658da6a3da282fdf524d3b7ae1",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "880fe5e7b996da0d33e78994c20d72e45ae2728f66fe2b658390ae65068b33b9"
+  },
+  {
+    "name": "七彩鲲鹏",
+    "key": "hero_20",
+    "source": "picture/鲲鹏灵.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Use the supplied ORIGINAL character as the authoritative identity reference. Redraw THIS SAME magical whale creature into an exquisite high-detail 2D fantasy RPG illustration atlas. Preserve the whale's broad rounded head, ventral throat pleats, two pectoral flippers, broad split whale tail, elongated whale body, pearlescent rainbow iridescent scales, golden ornamental gill/cheek fins, small amber eye, dark blue forehead. It is an airborne mystical whale. No beak, no feathers, no bird wings, no bird feet, no legs. Retain original silhouette and rainbow/pale gold/dark blue color family. Full creature must be visible in each frame. Four visibly different poses in a strict 2x2 equal grid: top left calm floating idle; top right curling tail and fins for windup; bottom left forward swimming lunge with tail pushing and fins swept; bottom right recoiling with body flexed and fins bracing. Face RIGHT in every pose, retain same anatomy and camera and scale. Painterly refined high-resolution fantasy illustration, detailed smooth scales and luminous rimlight, matching the currently approved polished game style. Remove the original circular backdrop, clouds, lettering and unwanted cutout holes. True transparent alpha surroundings, opaque creature body. EACH pose completely within its cell with 12% clear padding, no cross-cell overlap. No UI no text no grid lines no ground. Square atlas 2048x2048 if supported.",
+    "skills": {
+      "name": "扶摇直上",
+      "target": "ally_lowest_hp",
+      "cooldown": 5,
+      "desc": "天降祥瑞，恢复我方血量百分比最低的单体：七彩鲲鹏与目标各50%最大生命值混合后50%的血量",
+      "effects": [
+        {
+          "type": "heal",
+          "multiplier": 0.5
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      -1,
+      -1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_20.png",
+    "atlas": "poses/hero_20.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "9717febb9ade761d84d8a1c4660bc2768b8dc4ba2f307e8c160babc78c53aabc",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "b262d9ec1907bd3ee4e4653cca3c58514b203ef7dfa9b9ded689e5cf242e91ca"
+  },
+  {
+    "name": "金甲骑士",
+    "key": "hero_21",
+    "source": "picture/路法铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Exact armored knight from reference: fully ENCLOSED dark metal faceplate with bronze gold filigree, tall curled/peaked gold helmet crest, dark BRONZE and GOLD heavy plate armor, broad layered pauldrons, dark engraved gauntlets, deep RED cape and red lower cloth, sword held down beside hip. Preserve CLOSED HELMET, no face or hair visible, no white cape.",
+    "skills": {
+      "name": "不灭金魂",
+      "target": "self",
+      "cooldown": 5,
+      "desc": "金光一闪，增加自身30%的防御值",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "def",
+          "multiplier": 0.3
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      -1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_21.png",
+    "atlas": "poses/hero_21.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "d209db05f7b00064427e3cb8bbf1ac23defbcd5aa55afae7e0118b945e50d237",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "ae10c5b38868cad23e6c7c19b0ec76b627c1f5f2651ece01b8a8f3f47ed2eb93"
+  },
+  {
+    "name": "美杜莎",
+    "key": "hero_22",
+    "source": "picture/美杜莎.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult HUMAN woman with two human legs and long straight dark BROWN hair, gold hair ornament, fitted warm ORANGE RED long side-slit dress and gold ornamental trim, orange detached long sleeves, bare feet. Preserve human anatomy, brown hair, original face and orange clothing. No snake tail, no snake hair, no green armor.",
+    "skills": {
+      "name": "美杜莎凝望",
+      "target": "enemy_aoe",
+      "cooldown": 12,
+      "desc": "眼神震慑，降低敌方全体：美杜莎与目标各50%防御力混合后20%的防御值",
+      "effects": [
+        {
+          "type": "debuff",
+          "stat": "def",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_22.png",
+    "atlas": "poses/hero_22.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "77f650e832a3c1bdcb8b734a421575362fc133447225c4285e7ecaf1c52b8c97",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "3746cd95385df54c9bb286d6d4643b2d6b678d07758ce3016fd716d584ec447b"
+  },
+  {
+    "name": "紫萱",
+    "key": "hero_23",
+    "source": "picture/能量界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult female energy princess, long wavy LILAC PINK hair, delicate pink gold jeweled floral crown and forehead gem, elegant LILAC pink long silk dress with translucent flowing sleeves, floating pale purple orb in hand, pink jewel earrings. Preserve gentle face and lilac/pink pastel scheme.",
+    "skills": {
+      "name": "星华焕彩",
+      "target": "ally_aoe",
+      "cooldown": 24,
+      "desc": "星光落下，提升我方全体：紫萱与目标各50%攻击力和防御力混合后20%的属性值",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk, def",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_23.png",
+    "atlas": "poses/hero_23.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "73058d602756353441e63ab02e640a467d084cd26a86d6c8854dc97aebdd368c",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "5f25695f3976b627286d3bec1a42fdc1ffadebae8f5b6364593a7c38d0594aaf"
+  },
+  {
+    "name": "女武神",
+    "key": "hero_24",
+    "source": "picture/女帝甲灵.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Female armored divine figure with large GOLD feathered wings, gold circular halo, PURPLE and GOLD fitted full armor, purple jeweled breastplate, purple headpiece/crown, tall staff topped by glowing PURPLE spiral orb, ornate gold boots and shoulders. Preserve purple/gold palette and staff, not sword or spear. Ignore miniature duplicate at bottom of source.",
+    "skills": {
+      "name": "武神降临",
+      "target": "ally_lowest_def",
+      "cooldown": 4,
+      "desc": "召唤武神附身我方防御最低的单体，提升其：女武神与目标各50%防御力混合后40%的防御值",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "def",
+          "multiplier": 0.4
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_24.png",
+    "atlas": "poses/hero_24.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "3d7a35252824aa887e26855174dfa7d19b777d1caedd0a0d03b5d81ca625734f",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "969449c1de94194456c5efbb9a9ef8996a00f0c932917c707e58fa2a07366be7"
+  },
+  {
+    "name": "殿主",
+    "key": "hero_25",
+    "source": "picture/女皇铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult female queen with PINK hair swept up, GOLD pointed crown with purple gems, fitted PURPLE and GOLD plate armor, gold ornate pauldrons, purple cloak with white underside and long purple skirt panels, high gold/purple armored boots. Keep pink hairstyle and armor design, ignore display pedestal.",
+    "skills": {
+      "name": "天使之息",
+      "target": "enemy_random",
+      "cooldown": 2,
+      "desc": "召唤天使呼出天使气息，禁锢敌方随机单体2回合",
+      "effects": [
+        {
+          "type": "control",
+          "duration": 2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      -1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_25.png",
+    "atlas": "poses/hero_25.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "0e2474e8d09ba55ef8dc595aa184e8224f22b44e5b9703d85be8f0f8b5f696c7",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "03fcff12388fbdc6564251719b601723fa0c9ee71cdf1cec2cb4dcbf48ef3dd8"
+  },
+  {
+    "name": "无相菩萨",
+    "key": "hero_26",
+    "source": "picture/菩萨无相灵.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Golden BODHISATTVA in seated cross-legged lotus posture, calm closed-eye golden face, ornate golden crown, long gold robes, round gold halo, tall gold ringed Buddhist staff in one hand, other hand in blessing mudra. Preserve golden spiritual figure, lotus seated silhouette and staff. All four poses remain seated/levitating with changing arms/staff/torso. No walking legs.",
+    "skills": {
+      "name": "我佛慈悲",
+      "target": "ally_aoe",
+      "cooldown": 12,
+      "desc": "念经诵佛，提升我方全体：无相菩萨与目标各50%防御力混合后20%的防御值",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "def",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_26.png",
+    "atlas": "poses/hero_26.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "4bd81bfd39c731abf6bdd96944d8b0a57d27a83a25c2289ac1da4aebcc135436",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "042c59cd2c33740299a58d3750678a6a37f1d3904b5dfbcd8270d68cc59449b1"
+  },
+  {
+    "name": "乔奢费",
+    "key": "hero_27",
+    "source": "picture/乔奢费铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Fully enclosed DARK BLACK and PURPLE armored knight, two tall angular pointed horns, elongated closed black faceplate, layered blade-like shoulders, central PURPLE jewel in chest, claw-like gauntlets and dark blade at hip. Keep faceless closed helmet and violet/black palette.",
+    "skills": {
+      "name": "地狱之血",
+      "target": "self",
+      "cooldown": 2,
+      "desc": "燃烧精血，提升自身10%的攻击力和防御力",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk, def",
+          "multiplier": 0.1
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_27.png",
+    "atlas": "poses/hero_27.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "7c9f3fc49ba43ef7811e2d76bffd5ca934875938926a040be438a8a1bfbc93cf",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "46ae4fbae02634ce065ae4188242f72cafeb761c3b92c287fad53d15832d7fbe"
+  },
+  {
+    "name": "人鱼公主",
+    "key": "hero_28",
+    "source": "picture/人鱼公主.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Mermaid princess with long wavy BLUE hair, white shell/star hair clip, PINK seashell top, delicate pearl necklaces, GOLD and TEAL fish tail with translucent BLUE fins, ivory flute held to mouth. Preserve mermaid tail, blue hair and flute; no human legs or staff.",
+    "skills": {
+      "name": "凛冬·归寂",
+      "target": "enemy_aoe",
+      "cooldown": 12,
+      "desc": "吹出笛声，迷惑敌方全体2回合",
+      "effects": [
+        {
+          "type": "control",
+          "duration": 2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_28.png",
+    "atlas": "poses/hero_28.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "4cb63aa93f5721e0083810a597a9ec66cee09de49d3f4a30be18b739bace3910",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "cccb1414c9cc4df67b2c1e72c4bc263163e7234ca8d1f1886ffc0c30e90a3019"
+  },
+  {
+    "name": "若溪",
+    "key": "hero_29",
+    "source": "picture/弱水界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult aquatic fairy WOMAN with long WHITE silver hair, delicate icy blue floral head ornament and forehead jewel, blue eyes, sheer pale BLUE long dress with white flowing gauze, pale face and gentle expression. Preserve delicate feminine face and blue-white water motif; no armor or staff.",
+    "skills": {
+      "name": "柔情似水",
+      "target": "ally_highest_atk",
+      "cooldown": 5,
+      "desc": "以极致的服务提升我方攻击力最高的单体：若溪与目标各50%攻击力混合后50%的攻击值",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk",
+          "multiplier": 0.5
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_29.png",
+    "atlas": "poses/hero_29.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1038,
+      1515
+    ],
+    "portraits_sha256": "cc66f1f8a88091d0430212289d4a6c8fb8b4176135483fe96b8c1076c7c05883",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "9970711be616c39649a02a8cca06596c9ba0b64a38e303cd57d8e4432ac9762f"
+  },
+  {
+    "name": "兽神王",
+    "key": "hero_30",
+    "source": "picture/兽神王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Exact DRAGON MECHA humanoid warrior, BLACK SILVER RED angular metal armor, enclosed horned dragon-shaped robotic head, dragon-head shaped wing/shoulder structures, spiked long mechanical dragon tail, large mechanical gun/launcher on one arm, golden orange accents. Preserve HUMANOID mechanical legs/arms, dragon appendages and launcher. No bear or furry beast.",
+    "skills": {
+      "name": "真龙·神降",
+      "target": "enemy_random",
+      "cooldown": 5,
+      "desc": "对敌方随机单体造成：兽神王50%攻击力的伤害、1回合控制，兽神王与目标各50%攻击力和防御力的20%的两项属性值降低",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 0.5
+        },
+        {
+          "type": "control",
+          "duration": 1
+        },
+        {
+          "type": "debuff",
+          "stat": "atk, def",
+          "multiplier": 0.2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_30.png",
+    "atlas": "poses/hero_30.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "d78634448e763063706683da4cb0e7795211a8d3be4196b02eeea2a06726d235",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "76024549c0b89ff492ce93f08c492a9bc32c3637dc131c459371ff548bacf7ac"
+  },
+  {
+    "name": "净水使",
+    "key": "hero_31",
+    "source": "picture/水系魂铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult female water warrior, dark black hair in high bun with trailing hair, BLUE segmented armor, blue layered flowing skirt with pale water patterns, dark blue boots, orb of WATER held in hands and flowing watery sleeves. Preserve blue armor and black hair.",
+    "skills": {
+      "name": "净水莲华",
+      "target": "ally_random",
+      "cooldown": 2,
+      "desc": "洗涤污秽，解除我方随机单体的控制状态并附加2回合免控",
+      "effects": [
+        {
+          "type": "immune",
+          "duration": 2
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_31.png",
+    "atlas": "poses/hero_31.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "d686facca14c4451842f05a5b38f230277d3111d665182c923f2e0aaa6ce63ce",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "5532363033eaa07ecfa1ddd0a3db59ba1a8e9876dbc9b9edd4335ba548b73a14"
+  },
+  {
+    "name": "剑光仙",
+    "key": "hero_32",
+    "source": "picture/小剑仙.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult male sword immortal with long flowing WHITE hair, ornate GOLD crown and circular golden halo, BLACK long robe covered in fine GOLD floral embroidery, GOLD pauldrons, slender golden-white long sword, noble pale face. Preserve black/gold robe and long white hair.",
+    "skills": {
+      "name": "万剑归宗",
+      "target": "enemy_aoe",
+      "cooldown": 6,
+      "desc": "召唤群剑，对敌方全体造成剑光仙100%攻击力的光明剑气伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 1.0
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_32.png",
+    "atlas": "poses/hero_32.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "6d815a74b6c9e2347a9f9914976af259b70137ab0210d8d1f84680941660cf8a",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "249c01d9622ea676b07b3ac7149423a75c848900f2f7925f4eae1777125d5b85"
+  },
+  {
+    "name": "刑天",
+    "key": "hero_33",
+    "source": "picture/刑天铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Exact red silver black tokusatsu armored warrior, fully enclosed helmet with RED top panel, BLUE horizontal visor, two thin GOLD upward horns, geometric RED and SILVER chest/shoulder plates, black bodysuit, silver shin guards, red transformation belt, long broad white SILVER sword. Preserve mechanical suit and helmet, no human face/hair or fantasy cape.",
+    "skills": {
+      "name": "火刑连斩",
+      "target": "self",
+      "cooldown": 3,
+      "desc": "每次使用火刑天烈剑都会叠加伤害，增加刑天30%攻击力",
+      "effects": [
+        {
+          "type": "buff",
+          "stat": "atk",
+          "multiplier": 0.3
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_33.png",
+    "atlas": "poses/hero_33.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1449
+    ],
+    "portraits_sha256": "752c4e17f5d4db11da909a55a03cd03974b23048a6df3f53c6e4d4c7b390f644",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "26dd45a7c4f43783bebfbde5c5169bbfb78b3a82e7284bc750fbdc7b2061847b"
+  },
+  {
+    "name": "炎龙",
+    "key": "hero_34",
+    "source": "picture/炎龙铠.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Exact RED BLACK SILVER armored dragon-themed tokusatsu warrior, enclosed sharp red helmet with SILVER horns and blue visor, bright round GOLD chest core, sculpted silver/red pauldrons, black cape, red shin armor, broad flaming orange-red SWORD. Keep same mechanical armor and head; ignore any extra source miniatures.",
+    "skills": {
+      "name": "龙炎拳",
+      "target": "enemy_front",
+      "cooldown": 3,
+      "desc": "向前挥出龙炎拳，对敌方前排单体造成炎龙300%攻击力的伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 3.0
+        }
+      ]
+    },
+    "attack_style": "melee",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_34.png",
+    "atlas": "poses/hero_34.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "8a13c88711659d95bc7cc4267453104b85b2f4a38cc1ca36c957aaf4f6f56aef",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "0973df1e5c41ec2911779802c75c534d4c692b0658b33f371cec22ba74fa3669"
+  },
+  {
+    "name": "烈火战龙",
+    "key": "hero_35",
+    "source": "picture/炎龙灵.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Large western FIRE DRAGON: dark charcoal scales, orange glowing molten cracks especially chest and belly, long neck, horned head, huge BLACK/RED leathery bat wings, powerful clawed hind legs and forelimbs, long spined tail, fiery breath. Preserve dragon anatomy and molten black/orange palette. Omit tiny armored duplicate at source bottom.",
+    "skills": {
+      "name": "喷射火焰",
+      "target": "enemy_random",
+      "cooldown": 1,
+      "desc": "向敌方随机单体喷射火焰，造成烈火战龙200%攻击力的灼烧伤害",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 2.0
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_35.png",
+    "atlas": "poses/hero_35.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1312,
+      1199
+    ],
+    "portraits_sha256": "8c793348e7f1b2b236b6f0829ac56d24f025530ab2c8644a541d69db3ed32ac3",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "b949e246d96a7d2d37d0867d676a32bbf946b3e178b74bf73611a6f628e89f8e"
+  },
+  {
+    "name": "萧炎",
+    "key": "hero_36",
+    "source": "picture/异火界王.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Adult male flame immortal with very long RED hair, elaborate black red crown, pale face and red forehead mark, BLACK and RED long Chinese flowing robe with gold/red trim, flame lotus held in hand, large fire halo. Preserve red hair, face, black-red robe and lotus.",
+    "skills": {
+      "name": "佛怒火莲",
+      "target": "enemy_aoe",
+      "cooldown": 6,
+      "desc": "凝聚火莲，对敌方全体造成萧炎50%攻击力的伤害并回复萧炎实际造成伤害的50%血量",
+      "effects": [
+        {
+          "type": "damage",
+          "multiplier": 0.5
+        },
+        {
+          "type": "lifesteal",
+          "multiplier": 0.5
+        }
+      ]
+    },
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_36.png",
+    "atlas": "poses/hero_36.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "50ffd9e8530fe8ed8e0cac7f8b4e582ec64ba8be2c24c24c5d49f451d7c7fdee",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "c836f394f876d311b4e06b70efd1816a044c1319926be06927eb6d9deb00bbc3"
+  },
+  {
+    "name": "尊皇圣帝",
+    "key": "hero_37",
+    "source": "picture/尊皇圣帝.png",
+    "method": "built-in image_gen",
+    "identity_constraints": "Mature bearded male golden deity, GOLD crown, golden brown hair and full beard, GOLD muscular ornate armor, RED flowing cape, round sun halo, ornate sun-orb STAFF in one hand and long gold HALBERD in other. Preserve two different weapons, beard, red cape and gold armor. Remove ground magic circle.",
+    "skills": [
+      {
+        "name": "单体复活",
+        "target": "ally_dead_random",
+        "cooldown": 1,
+        "desc": "复活我方随机一个死亡角色，并恢复其血量至尊皇圣帝与目标各50%最大生命值混合后100%的血量",
+        "effects": [
+          {
+            "type": "resurrect",
+            "multiplier": 1.0
+          }
+        ]
+      }
+    ],
+    "attack_style": "ranged",
+    "source_facing": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "portrait": "portraits/hero_37.png",
+    "atlas": "poses/hero_37.png",
+    "poses": [
+      "idle",
+      "prepare",
+      "release",
+      "hit"
+    ],
+    "portraits_size": [
+      1086,
+      1448
+    ],
+    "portraits_sha256": "f09f9ef96adea6b26c7a5a3dae488cba6cd9f059631551086be3237d963a1860",
+    "poses_size": [
+      1254,
+      1254
+    ],
+    "poses_sha256": "806ba8193b8f2593c5e03fbbe5d24ee75ee9c18a140a07686075050bfcca1934"
+  }
+]

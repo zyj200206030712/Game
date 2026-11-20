@@ -1,10 +1,27 @@
 # config.py  存放所有静态配置（颜色、常量、角色属性、关卡阵容）
 # ================= 1. 基础配置 =================
 WIDTH, HEIGHT = 1280, 800  
-WHITE, BLACK, BG_COLOR = (255, 255, 255), (30, 30, 30), (245, 246, 250)
-TOP_BAR_COLOR, PANEL_COLOR, SHADOW_COLOR = (45, 52, 54), (255, 255, 255), (200, 205, 215)
-DARK_GRAY, RED, GREEN, BLUE, GOLD = (120, 120, 120), (231, 76, 60), (46, 204, 113), (52, 152, 219), (241, 196, 15)
-PURPLE = (155, 89, 182)
+# 明亮的银蓝背景、象牙白面板与暖金装饰，文字使用深色保证对比度。
+WHITE, BLACK, BG_COLOR = (255, 253, 247), (34, 51, 71), (205, 222, 237)
+TOP_BAR_COLOR, PANEL_COLOR, SHADOW_COLOR = (229, 238, 246), (250, 247, 238), (169, 147, 101)
+DARK_GRAY, RED, GREEN, BLUE, GOLD = (80, 97, 115), (166, 55, 53), (35, 116, 87), (35, 100, 143), (126, 89, 29)
+PURPLE = (112, 65, 145)
+
+
+def formation_position(slot, is_enemy):
+    # 我方右列、敌方左列为前排，与战斗位置的空间关系一致。
+    column = slot // 3 if is_enemy else 1 - slot // 3
+    return (689 if is_enemy else 99) + column * 249, 194 + (slot % 3) * 90
+
+
+# 槽位 1–3 为前排，4–6 为后排，画面依然与原有行动顺序一致。
+def battle_position(slot, is_enemy):
+    # 交错纵深让放大的人物仍有独立轮廓，普通攻击可进入中央交战区。
+    positions = ((420, 351), (352, 523), (438, 715),
+                 (166, 329), (128, 497), (190, 692))
+    x, y = positions[slot]
+    return (WIDTH - x if is_enemy else x), y
+
 
 # 角色与技能配置（hp:100~1000, atk:10~100, def:10~100；角色可使用单个 skill 或 skills 列表；skills 中每个技能可配置 priority，优先级越高越先释放；damage类multiplier按施法者攻击结算；heal/buff/debuff按施法者与目标各50%的对应属性混合结算；lifesteal按刚造成的实际伤害 * multiplier 回血；resurrect按施法者与目标各50%最大生命值混合后 * multiplier 复活，并重置目标战斗态，cd）
 HERO_CONFIG = {
@@ -12,15 +29,15 @@ HERO_CONFIG = {
         "image": "picture/安迷修铠.png", "hp": 500, "atk": 50, "def": 60, "tag": "单体减攻",
         "skill": {
             "name": "紫鳞刺", "target": "enemy_highest_atk", "cooldown": 3, 
-            "desc": "发动刺击，降低敌方攻击最高的单体：安迷修与目标各50%攻击力混合后30%的攻击值",
+            "desc": "发动刺击，降低敌方攻击最高的单体：安迷修与目标攻击力均值的30%的攻击值",
             "effects": [{"type": "debuff", "stat": "atk", "multiplier": 0.3}]
         }
     },
     "暗魂": {
         "image": "picture/暗系魂铠.png", "hp": 500, "atk": 50, "def": 60, "tag": "单体减防",
         "skill": {
-            "name": "暗影侵蚀", "target": "enemy_higest_def", "cooldown": 3, 
-            "desc": "发动暗影之力，降低敌方防御力最高的单体：暗魂与目标各50%防御力混合后30%的防御值",
+            "name": "暗影侵蚀", "target": "enemy_highest_def", "cooldown": 3, 
+            "desc": "发动暗影之力，降低敌方防御力最高的单体：暗魂与目标防御力均值的30%的防御值",
             "effects": [{"type": "debuff", "stat": "def", "multiplier": 0.3}]
         }
     },
@@ -36,7 +53,7 @@ HERO_CONFIG = {
         "image": "picture/白灵.png", "hp": 400, "atk": 70, "def": 40, "tag": "后排杀手",
         "skill": {
             "name": "骨杀·刺", "target": "enemy_back", "cooldown": 2, 
-            "desc": "瞬间化作骨影绕到敌方后排，对敌方后排单体造成白骨夫人200%攻击力的伤害",
+            "desc": "瞬间化作骨影绕到敌方最后排，对敌方最后排单体造成白骨夫人200%攻击力的伤害",
             "effects": [{"type": "damage", "multiplier": 2.0}]
         }
     },
@@ -65,10 +82,10 @@ HERO_CONFIG = {
         }
     },
     "五灵龙神": {
-        "image": "picture/帝皇神.png", "hp": 600, "atk": 50, "def": 80, "tag": "全能对群",
+        "image": "picture/帝皇神.png", "hp": 555, "atk": 55, "def": 55, "tag": "全能对群",
         "skill": {
             "name": "五行·八卦阵", "target": "enemy_aoe", "cooldown": 21, 
-            "desc": "对敌方全体造成：五灵龙神50%攻击力的伤害、1回合束缚，五灵龙神与目标各50%攻击力和防御力的10%的两项属性值降低",
+            "desc": "对敌方全体造成：五灵龙神50%攻击力的伤害、1回合束缚，五灵龙神与目标各攻击力均值和防御力均值的10%的两项属性值降低",
             "effects": [
                 {"type": "damage", "multiplier": 0.5},
                 {"type": "control", "duration": 1},
@@ -80,7 +97,7 @@ HERO_CONFIG = {
         "image": "picture/毒系魂铠.png", "hp": 400, "atk": 40, "def": 60, "tag": "群体减益",
         "skill": {
             "name": "紫魂毒雾", "target": "enemy_aoe", "cooldown": 24, 
-            "desc": "布下毒雾使敌方全体中毒，降低敌方全体：毒孤博与目标各50%攻击力和防御力混合后的20%的两项属性值",
+            "desc": "布下毒雾使敌方全体中毒，降低敌方全体：毒孤博与目标攻击力均值和防御力均值的20%的两项属性值",
             "effects": [{"type": "debuff", "stat": "atk, def", "multiplier": 0.2}]
         }
     },
@@ -88,7 +105,7 @@ HERO_CONFIG = {
         "image": "picture/粉仙子.png", "hp": 300, "atk": 10, "def": 20, "tag": "群体回血",
         "skill": {
             "name": "繁花映血", "target": "ally_aoe", "cooldown": 12, 
-            "desc": "唤起生命花海，为我方全体恢复：小花仙与目标各50%最大生命值混合后20%的血量",
+            "desc": "唤起生命花海，为我方全体恢复：小花仙与目标各最大生命值均值的20%的血量",
             "effects": [{"type": "heal", "multiplier": 0.2}]
         }
     },
@@ -133,18 +150,18 @@ HERO_CONFIG = {
         }
     },
     "精灵公主": {
-        "image": "picture/精灵公主.png", "hp": 200, "atk": 80, "def": 30, "tag": "单体连击",
+        "image": "picture/精灵公主.png", "hp": 400, "atk": 60, "def": 45, "tag": "连击前单",
         "skill": {
             "name": "森之箭", "target": "enemy_front", "cooldown": 1, 
-            "desc": "射出箭矢，对敌方前排单体目标造成精灵公主199%攻击力的伤害",
+            "desc": "射出箭矢，对敌方最前排单体目标造成精灵公主199%攻击力的伤害",
             "effects": [{"type": "damage", "multiplier": 1.99}]
         }
     }, 
     "巨甲象": {
-        "image": "picture/巨甲象灵.png", "hp": 1000, "atk": 60, "def": 80, "tag": "前排回血",
+        "image": "picture/巨甲象灵.png", "hp": 999, "atk": 60, "def": 80, "tag": "前排回血",
         "skill": {
             "name": "不屈意志", "target": "self", "cooldown": 5, 
-            "desc": "唤醒古山之志，恢复自身：巨甲象与目标各50%最大生命值混合后50%的血量",
+            "desc": "唤醒古山之志，恢复自身：最大生命值50%的血量",
             "effects": [{"type": "heal", "multiplier": 0.5}]
         }
     },
@@ -168,7 +185,7 @@ HERO_CONFIG = {
         "image": "picture/傀儡界王.png", "hp": 200, "atk": 90, "def": 20, "tag": "残血收割",
         "skill": {
             "name": "幽冥·瞬狱杀", "target": "enemy_lowest_hp", "cooldown": 1, 
-            "desc": "召唤傀儡，对敌方血量百分比最低的单体造成傀儡女王100%攻击力的致命打击",
+            "desc": "召唤骷髅头，对敌方血量百分比最低的单体造成傀儡女王100%攻击力的致命打击",
             "effects": [{"type": "damage", "multiplier": 1.0}]
         }
     },
@@ -197,18 +214,18 @@ HERO_CONFIG = {
         }
     },
     "紫萱": {
-        "image": "picture/能量界王.png", "hp": 300, "atk": 30, "def": 30, "tag": "群体强化",
+        "image": "picture/能量界王.png", "hp": 300, "atk": 40, "def": 40, "tag": "群体强化",
         "skill": {
             "name": "星华焕彩", "target": "ally_aoe", "cooldown": 24, 
-            "desc": "星光落下，提升我方全体：紫萱与目标各50%攻击力和防御力混合后20%的属性值",
+            "desc": "星光落下，提升我方全体：紫萱与目标攻击力均值和防御力均值的20%的属性值",
             "effects": [{"type": "buff", "stat": "atk, def", "multiplier": 0.2}]
         }
     },
     "女武神": {
-        "image": "picture/女帝甲灵.png", "hp": 300, "atk": 10, "def": 50, "tag": "单体加防",
+        "image": "picture/女帝甲灵.png", "hp": 300, "atk": 10, "def": 60, "tag": "单体加防",
         "skill": {
             "name": "武神降临", "target": "ally_lowest_def", "cooldown": 4, 
-            "desc": "召唤武神附身我方防御最低的单体，提升其：女武神与目标各50%防御力混合后40%的防御值",
+            "desc": "召唤武神附身我方防御最低的单体，提升其：女武神与目标防御力均值的40%的防御值",
             "effects": [{"type": "buff", "stat": "def", "multiplier": 0.4}]
         }
     },
@@ -273,7 +290,7 @@ HERO_CONFIG = {
         }
     },
     "剑光仙": {
-        "image": "picture/小剑仙.png", "hp": 400, "atk": 100, "def": 40, "tag": "群体伤害",
+        "image": "picture/小剑仙.png", "hp": 400, "atk": 90, "def": 40, "tag": "群体伤害",
         "skill": {
             "name": "万剑归宗", "target": "enemy_aoe", "cooldown": 6, 
             "desc": "召唤群剑，对敌方全体造成剑光仙100%攻击力的光明剑气伤害",
@@ -281,23 +298,23 @@ HERO_CONFIG = {
         }
     },
     "刑天": {
-        "image": "picture/刑天铠.png", "hp": 500, "atk": 70, "def": 60, "tag": "攻击强化",
+        "image": "picture/刑天铠.png", "hp": 500, "atk": 60, "def": 65, "tag": "攻击强化",
         "skill": {
-            "name": "火刑连斩", "target": "self", "cooldown": 3, 
-            "desc": "每次使用火刑天烈剑都会叠加伤害，增加刑天30%攻击力",
+            "name": "火刑剑势", "target": "self", "cooldown": 3, 
+            "desc": "每次使用火刑剑势都会叠加伤害，增加刑天30%攻击力",
             "effects": [{"type": "buff", "stat": "atk", "multiplier": 0.3}]
         }
     },
     "炎龙": {
-        "image": "picture/炎龙铠.png", "hp": 500, "atk": 80, "def": 60, "tag": "单体强攻",
+        "image": "picture/炎龙铠.png", "hp": 500, "atk": 80, "def": 65, "tag": "强攻前单",
         "skill": {
-            "name": "龙炎拳", "target": "enemy_front", "cooldown": 3, 
-            "desc": "向前挥出龙炎拳，对敌方前排单体造成炎龙300%攻击力的伤害",
+            "name": "龙炎斩", "target": "enemy_front", "cooldown": 3, 
+            "desc": "向前挥出火刀，对敌方最前排单体造成炎龙300%攻击力的伤害",
             "effects": [{"type": "damage", "multiplier": 3.0}]
         }
     },
     "烈火战龙": {
-        "image": "picture/炎龙灵.png", "hp": 800, "atk": 80, "def": 70, "tag": "单体随伤",
+        "image": "picture/炎龙灵.png", "hp": 700, "atk": 70, "def": 70, "tag": "连击随单",
         "skill": {
             "name": "喷射火焰", "target": "enemy_random", "cooldown": 1, 
             "desc": "向敌方随机单体喷射火焰，造成烈火战龙200%攻击力的灼烧伤害",
@@ -345,7 +362,7 @@ HERO_CONFIG = {
             # },
             {
             "name": "单体复活", "target": "ally_dead_random", "cooldown": 1, 
-            "desc": "复活我方随机一个死亡角色，并恢复其血量至尊皇圣帝与目标各50%最大生命值混合后100%的血量",
+            "desc": "复活我方随机一个死亡角色，并恢复其血量至尊皇圣帝与目标各最大生命值均值的100%的血量",
             "effects": [{"type": "resurrect", "multiplier": 1.0}]
             },
             # {
@@ -413,3 +430,46 @@ STAGE_CONFIG = {
 }
 # 请继续添加STAGE_CONFIG中的关卡配置，使其按照HERO_CONFIG中角色的顺序逐个进行配置，每一层为同一个星级，每一层前6关人数从1个逐渐递增，后面每一关都为6人，直到把HERO_CONFIG中角色放完为止，并且每一关的level逐级增加
 
+
+# 演出配置与数值配置分离：普攻和对敌技能共用同一种攻击距离。
+# 原图四姿势的朝向依次为待机、蓄力、出招、受击；1 朝右，-1 朝左。
+COMBAT_PRESENTATION = {
+    "安迷修": {"style": "melee", "projectile": "bolt", "facing": (-1, -1, 1, -1)},
+    "暗魂": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "净世圣女": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "白骨夫人": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "冰云剑仙": {"style": "ranged", "projectile": "blade", "facing": (1, 1, 1, 1)},
+    "魅狐妖姬": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "帝皇": {"style": "ranged", "projectile": "blade", "facing": (1, 1, 1, 1)},
+    "五灵龙神": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "毒孤博": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "小花仙": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "光明神王": {"style": "ranged", "projectile": "blade", "facing": (1, 1, 1, 1)},
+    "艾莎": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "黑迪": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "黑骑女将": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "极光神使": {"style": "ranged", "projectile": "blade", "facing": (1, 1, 1, 1)},
+    "精灵公主": {"style": "ranged", "projectile": "arrow", "facing": (1, 1, 1, 1)},
+    "巨甲象": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "巨爪熊": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "库忿斯": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "傀儡女王": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "七彩鲲鹏": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "金甲骑士": {"style": "melee", "projectile": "bolt", "facing": (-1, -1, 1, -1)},
+    "美杜莎": {"style": "ranged", "projectile": "bolt", "facing": (-1, 1, 1, 1)},
+    "紫萱": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "女武神": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "殿主": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "无相菩萨": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "乔奢费": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "人鱼公主": {"style": "ranged", "projectile": "wave", "facing": (1, 1, 1, 1)},
+    "若溪": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "兽神王": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "净水使": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "剑光仙": {"style": "ranged", "projectile": "blade", "facing": (1, 1, 1, 1)},
+    "刑天": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "炎龙": {"style": "melee", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+    "烈火战龙": {"style": "ranged", "projectile": "fire", "facing": (1, 1, 1, 1)},
+    "萧炎": {"style": "ranged", "projectile": "fire", "facing": (1, 1, 1, 1)},
+    "尊皇圣帝": {"style": "ranged", "projectile": "bolt", "facing": (1, 1, 1, 1)},
+}

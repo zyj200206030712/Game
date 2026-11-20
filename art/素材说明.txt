@@ -1,0 +1,18 @@
+﻿Game 美术资源说明
+
+一、Card_Place 当前使用的素材（路径相对于 art）
+cinematic/portraits/    38 张高清全身立绘。角色页、召唤结果、阵容头像和图鉴缩略图均使用这些立绘。
+cinematic/poses/        38 张战斗动作图集。每张按 2×2 排列，左上为待机，右上为蓄力，左下为释放，右下为受击。
+cinematic/ui/           home.png、hero.png、summon.png 分别为战前阵容页、角色页和召唤页背景；icons.png 为导航图标，widgets.png 为按钮与卡背等控件。
+illustrated/arena.png   实际交战时的背景。布阵页使用的是 cinematic/ui/home.png。
+cinematic/manifest.json 角色与图片编号对照表。按角色名查找，可看到 picture 原图、高清立绘路径和战斗图集路径。例如安迷修对应 hero_00。
+cinematic/generation_brief_v2.md  重绘素材时使用的美术说明。
+
+二、旧素材归档（archive）
+faithful/      38 张旧角色动作图集及 3 个 JSON 记录文件。若某角色的新版动作图缺失，Card_Place 会从这里读取对应的旧图集。
+illustrated/   12 张旧角色主题图。当前游戏代码未引用。
+root_images/   原先散放在 art 根目录的 19 张图片，含 arena.jpg、角色图及骑士、精灵的单独动作图。当前游戏代码未引用。
+部分旧图同名但属于不同批次，已按来源分目录保留。
+
+三、与 Game/picture 的关系
+picture 与 art 同级，保存原始角色图、场景背景和角色视频。Free 直接读取 picture；Card_Place 的角色配置也保留了其中的原图路径，部分绘制逻辑会在缺少重绘资源时使用原图。

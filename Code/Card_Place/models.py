@@ -3,14 +3,17 @@
 import json
 from pathlib import Path
 from config import HERO_CONFIG, STAGE_CONFIG
-from ui import load_image
 
+# 读取和保存共用同一文件；存档缺失时按新游戏初始化。
 SAVE_PATH = Path(__file__).with_name("save_data.json")
 
 class Character:
     def __init__(self, name, image_file, base_hp, base_atk, base_def, tag="普通", skill=None, skills=None):
         self.name = name
-        self.image = load_image(image_file)
+        # 创建角色时再加载头像，允许界面模块直接引用角色类。
+        from ui import load_portrait
+        self.image = load_portrait(name, image_file)
+        self.image_file = image_file
         self.level, self.star, self.duplicates = 1, 1, 0
         self.base_hp, self.base_atk, self.base_def = base_hp, base_atk, base_def
         self.tag = tag 
@@ -144,13 +147,13 @@ def get_stage_enemies(level):
         return scaled_enemies
 
 class GameData:
-    def __init__(self):
+    def __init__(self, load_progress=True):
         self.gold = 0
         self.level = 1
         self.owned_heroes = []
         self.deployed_party = [None] * 6
-        self.current_hero_index = 0
-        self.hero_page = 0
+        self.catalog_offset = 0
+        self.previews = {}
         self.current_scene = "LEVEL"
         self.log_scroll_y = 0
         self.battle_result = "" 
@@ -159,18 +162,13 @@ class GameData:
         self.turn_counter = 0 
         self.current_attacker = None 
         self.current_target = None   
-        self.sys_message = self.load_game()
+        self.sys_message = self.load_game() if load_progress else ""
         
         self.current_enemy_configs = get_stage_enemies(self.level)
         self.enemy_party = []
 
-    @property
-    def display_heroes(self):
-        display = list(self.deployed_party) 
-        for h in self.owned_heroes:
-            if h not in self.deployed_party:
-                display.append(h)
-        return display
+        first = next((hero for hero in self.deployed_party if hero), None)
+        self.selected_name = first.name if first else next(iter(HERO_CONFIG))
 
     def get_idle_rate(self): return self.level * 1
 
@@ -200,11 +198,16 @@ class GameData:
         return True
 
     def get_active_hero(self):
-        display = self.display_heroes
-        if not display: return None
-        if self.current_hero_index >= len(display):
-            self.current_hero_index = 0
-        return display[self.current_hero_index]
+        owned = next((hero for hero in self.owned_heroes if hero.name == self.selected_name), None)
+        if owned:
+            return owned
+        # 未获得角色可浏览基础属性和立绘，预览对象独立于玩家背包。
+        name = self.selected_name
+        if name not in self.previews:
+            data = HERO_CONFIG[name]
+            self.previews[name] = Character(name, data["image"], data["hp"], data["atk"],
+                                           data["def"], data["tag"], data.get("skill"), data.get("skills"))
+        return self.previews[name]
 
     def save_game(self):
         data = {"gold": self.gold, "level": self.level, "heroes":[]}
@@ -212,8 +215,11 @@ class GameData:
             pos = self.deployed_party.index(h) if h in self.deployed_party else -1
             data["heroes"].append({"name": h.name, "level": h.level, "star": h.star, "duplicates": h.duplicates, "pos": pos})
         try:
-            with SAVE_PATH.open("w", encoding="utf-8") as f:
+            # 临时文件写完后再替换，避免中途退出时留下半份存档。
+            temporary_path = SAVE_PATH.with_suffix(".tmp")
+            with temporary_path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
+            temporary_path.replace(SAVE_PATH)
             return "进度保存成功！"
         except: return "保存失败！"
 
@@ -232,5 +238,5 @@ class GameData:
                 self.add_hero(h_data["name"], h_data["level"], h_data["star"], h_data["duplicates"])
                 if h_data.get("pos", -1) != -1 and h_data.get("pos", -1) < 6: 
                     self.deployed_party[h_data["pos"]] = self.owned_heroes[-1]
-            return "存档已读取！"
+            return "游戏进度已读取"
         except: return "读取异常，开启新对局。"

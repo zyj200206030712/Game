@@ -1,472 +1,480 @@
-# Card Place（卡牌放置）运行与开发教程
+# Card Place（卡牌放置）——项目说明与内容扩展指南
 
-Card Place 是一款使用 Python 和 Pygame 开发的放置卡牌游戏。玩家可以召唤并培养角色、配置六人阵容、挑战关卡，并观看角色按照阵位和技能冷却自动战斗。
+## 一、项目是什么
 
-本文档面向第一次运行或修改本项目的开发者，主要说明环境安装、游戏启动方式、代码模块分工，以及新增角色、关卡、技能和 UI 的具体位置。
+Card Place 是使用 Python + Pygame 开发的单机放置式卡牌战斗游戏。玩家通过召唤角色获得卡牌，重复召唤转化为同名碎片；使用金币提升等级、使用碎片提高星级，最多选择 6 名角色布阵并挑战自动战斗关卡。
 
-## 1. 运行环境
 
-### 1.1 推荐环境
+**主要玩法：**
 
-| 项目 | 推荐配置 |
-| --- | --- |
-| 操作系统 | Windows 10 / Windows 11 |
-| Python | Python 3.10～3.12 |
-| IDE | PyCharm（也可以使用 VS Code 或命令行） |
-| 第三方包 | Pygame |
+- 角色图鉴：查看角色立绘、属性、技能，进行升级、升星与阵位配置。
+- 关卡战斗：按照前排/后排阵位自动普攻、释放技能、结算战斗。
+- 召唤养成：单抽 500 金币，十连 5000 金币，重复角色变成 1 个碎片。
+- 挂机资源：每秒获得“当前关卡编号”数量的金币。
+- 胜利奖励：600 + 当前关卡编号 × 50 金币，然后进入下一关。
+- 测试模式：可单独指定双方角色、等级、星级，进行临时模拟战斗。
+- 战斗演出：角色四姿势图集、近战位移、远程投射物、受击和技能特效。
 
-项目除 Pygame 外只使用了 Python 标准库，例如 `json`、`math`、`pathlib`、`random` 和 `sys`。
+角色、关卡、技能和数值主要在 `config.py` / `models.py` / `battle.py` 中维护；
+界面和美术显示主要由 `main.py` / `ui.py` 维护。
 
-角色图片统一存放在项目根目录的 `picture` 文件夹中。不要只复制或移动 `Code/Card_Place` 文件夹，否则游戏可能找不到图片资源。
 
-### 1.2 检查 Python
+## 二、项目文件分别负责什么
 
-打开 PowerShell 或 PyCharm Terminal，执行：
+项目结构如下：
 
-```powershell
-python --version
 ```
-
-如果能够显示 Python 版本，说明 Python 已加入系统环境变量。若提示找不到 `python`，需要重新安装 Python，并在安装时勾选 **Add Python to PATH**。
-
-### 1.3 创建虚拟环境（推荐）
-
-在项目根目录，也就是包含 `Code`、`picture` 等文件夹的 `Game` 目录中执行：
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-激活成功后，终端命令行前通常会出现 `(.venv)`。
-
-如果 PowerShell 禁止执行激活脚本，也可以不手动激活，直接使用：
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install pygame
-.\.venv\Scripts\python.exe Code\Card_Place\main.py
-```
-
-### 1.4 安装 Pygame
-
-```powershell
-python -m pip install pygame
-```
-
-安装后执行下面的命令检查版本：
-
-```powershell
-python -c "import pygame; print(pygame.version.ver)"
-```
-
-能够输出 Pygame 版本号即表示安装成功。使用 `python -m pip` 可以避免把 Pygame 安装到另一个 Python 解释器中。
-
-## 2. 启动游戏
-
-### 2.1 命令行启动
-
-先进入项目根目录 `Game`，再运行游戏入口：
-
-```powershell
-python Code\Card_Place\main.py
-```
-
-`Code/Card_Place/main.py` 是游戏唯一入口文件，其中的 `main()` 函数负责创建窗口、初始化游戏数据并启动每秒 60 帧的主循环。
-
-虽然资源加载代码能够从项目位置寻找图片，但仍建议始终从项目根目录启动，便于保持统一的运行方式。
-
-### 2.2 使用 PyCharm 启动
-
-1. 使用 PyCharm 打开整个 `Game` 项目，不要只打开 `Card_Place` 子目录。
-2. 在 **Settings → Project → Python Interpreter** 中选择安装了 Pygame 的解释器。
-3. 打开 `Code/Card_Place/main.py`，右键选择 **Run 'main'**。
-4. 如果启动配置不正确，打开 **Run → Edit Configurations**，设置：
-   - **Script path**：`$PROJECT_DIR$/Code/Card_Place/main.py`
-   - **Working directory**：`$PROJECT_DIR$`
-   - **Python interpreter**：安装了 Pygame 的项目解释器
-
-### 2.3 基本操作
-
-游戏主要使用鼠标操作：
-
-- **战斗**：查看双方阵容并开始当前关卡。
-- **角色**：查看已拥有角色，进行升级、升星、上阵和下阵。
-- **召唤**：消耗金币进行单次召唤或十连召唤；重复角色会转化为碎片。
-- **进度保存**：将金币、关卡、角色养成和阵位写入本地存档。
-- **暂停 / 倍速 / 撤退**：在战斗过程中控制自动战斗。
-- **鼠标滚轮**：在战斗和结算页面滚动查看战斗日志。
-
-### 2.4 存档位置与重置进度
-
-存档文件位于：
-
-```text
-Code/Card_Place/save_data.json
-```
-
-游戏启动时会自动读取该文件；点击右上角的“进度保存”按钮时会覆盖保存当前进度。
-
-如需重新开始，先退出游戏并备份存档，然后删除原存档：
-
-```powershell
-Copy-Item Code\Card_Place\save_data.json Code\Card_Place\save_data.backup.json
-Remove-Item Code\Card_Place\save_data.json
-```
-
-再次启动后，游戏会发放初始金币和第一个角色。需要持久化新进度时，请再点击一次“进度保存”。
-
-## 3. 项目结构与模块职责
-
-```text
 Game/
 ├── Code/
 │   └── Card_Place/
-│       ├── main.py           # 游戏入口、主循环、事件和场景 UI
-│       ├── config.py         # 窗口、颜色、角色、技能和关卡配置
-│       ├── models.py         # 角色模型、成长、阵容和存档
-│       ├── battle.py         # 回合调度、目标选择和技能结算
-│       ├── ui.py             # 通用 UI 控件、文字、血条和图片缓存
-│       ├── save_data.json    # 本地游戏进度
-│       └── README.md         # 本教程
-└── picture/                  # 角色图片资源
+│       ├── main.py          # 游戏入口、场景切换、升级与升星交互
+│       ├── config.py        # 角色、关卡和战斗演出静态配置
+│       ├── models.py        # 角色成长、存档和自动关卡
+│       ├── battle.py        # 战斗行动与技能效果结算
+│       ├── ui.py            # UI 绘制、人物动作和技能特效
+│       ├── save_data.json   # 金币、关卡、角色和阵位存档
+│       └── README.md        # 项目开发说明
+├── art/                     # 新版及归档美术资源
+└── picture/                 # 原始角色图片及兼容回退图片
 ```
 
-| 文件 | 主要职责 | 常见修改场景 |
-| --- | --- | --- |
-| `main.py` | 初始化 Pygame、监听鼠标事件、切换场景、绘制页面、处理召唤与结算 | 新增按钮、页面或交互流程 |
-| `config.py` | 定义分辨率、颜色、`HERO_CONFIG` 和 `STAGE_CONFIG` | 新增角色、技能、关卡或修改数值 |
-| `models.py` | `Character` 和 `GameData` 数据模型、属性成长、阵容及 JSON 存档 | 修改成长公式、挂机收益或存档字段 |
-| `battle.py` | 角色行动顺序、技能选择、目标筛选和效果结算 | 新增目标规则、技能效果或战斗机制 |
-| `ui.py` | 按钮、文字换行、血条、浮动文字、标签和图片缓存 | 新增可复用 UI 控件或调整通用样式 |
-| `save_data.json` | 保存金币、关卡、角色等级、星级、碎片和阵位 | 调试存档或重置进度 |
+五个模块的调用关系：
 
-当前场景名称定义在 `main.py` 的逻辑中：
-
-- `LEVEL`：关卡及双方阵容页面。
-- `HERO`：角色查看与养成页面。
-- `GACHA`：召唤页面。
-- `BATTLE`：自动战斗页面。
-- `SETTLEMENT`：战斗结算页面。
-
-## 4. 功能修改指南
-
-### 4.1 修改窗口大小和颜色
-
-打开 `Code/Card_Place/config.py` 顶部：
-
-```python
-WIDTH, HEIGHT = 1280, 800
-WHITE, BLACK, BG_COLOR = (255, 255, 255), (30, 30, 30), (245, 246, 250)
+```text
+  main.py → models.py（角色、养成与存档）
+          → battle.py（战斗规则）
+          → ui.py（画面绘制）
+  config.py 提供各模块共用的静态配置。
 ```
 
-- 修改 `WIDTH`、`HEIGHT` 可以改变窗口分辨率。
-- 修改颜色元组可以调整全局主题。
-- `main.py` 中部分 UI 坐标按照当前 1280×800 布局编写，大幅修改分辨率后需要同步检查按钮和卡牌位置。
 
-### 4.2 新增角色和技能
+**常见修改目标：**
 
-角色配置位于 `Code/Card_Place/config.py` 的 `HERO_CONFIG` 字典。召唤池会通过 `list(HERO_CONFIG.keys())` 自动读取所有角色，因此新增角色后不需要再手动注册召唤池。
+- 角色数值、技能文本、关卡名单：`config.py`
+- 成长公式、伤害、存档、后续关卡算法：`models.py`
+- 技能选目标与作用效果：`battle.py`
+- 新页面、交互、升级/升星按钮、场景流程：`main.py`
+- 图鉴布局、按钮样式、图片加载、人物动作、特效：`ui.py`
 
-首先将角色图片放入项目根目录的 `picture` 文件夹，然后在 `HERO_CONFIG` 中增加配置。下面的模板可以直接复制：
+注意：上述目录是当前源码按 Code/Card_Place 所设定的相对结构；`ui.py` 用所在目录的第三级父目录作为项目根目录（PROJECT_ROOT）。
+
+
+## 三、如何新增角色：配置、基础属性和成长机制
+
+
+### 1. 现有角色与基础属性的含义
+
+`config.py` 中的 `HERO_CONFIG` 目前有 38 名角色。每个角色的 hp、atk、def 是生命、攻击、防御。
+
+
+
+### 2. 实际属性成长：`models.py` / Character.scale_stat()
+
+- `level` 和 `star` 决定最终属性,每升一级，属性在上一级基础上乘以 1.1 并四舍六入五成双取整；每升一星，属性直接翻倍。男性角色平均属性为 {"hp": 500, "atk": 50, "def": 50}，女性角色平均属性为 {"hp": 400, "atk": 40, "def": 40}，可作为设计新角色的参考。
+
+计算顺序：先计算等级成长（每一级都 round 取整），再计算星级倍率。
+
+`属性 = round(等级成长后的属性 × 2 ** (星级 - 1))`
+
+等级成长：从 1 级基础值开始，每提升一级，进行一次
+`value = round(value × 1.1)`
+例如 1→10 级，需要连续执行 9 次，不能简单把最后结果
+当作 round(基础值 × 1.1**9)，因为每一级都取整。
+星级倍率：★1=1 倍、★2=2 倍、★3=4 倍、★4=8 倍、
+★5=16 倍、★6=32 倍、★7=64 倍……
+round()：使用 Python 默认的最近偶数舍入规则，恰好遇到 x.5 时
+取相邻偶数；乘法浮点表示可能影响极少数边界值。
+
+
+**示例：安迷修的基础属性（500 / 50 / 60）**
+
+Lv.1  ★1：生命 500，攻击 50，防御 60
+Lv.10 ★1：生命 1181，攻击 119，防御 143
+Lv.10 ★2：生命 2362，攻击 238，防御 286
+Lv.10 ★3：生命 4724，攻击 476，防御 572
+
+
+**属性读取位置：**
+
+Character.max_hp：通过 scale_stat() 计算最大生命。
+Character.atk：等级星级攻击 + 战斗临时攻击增减益；最低为 0。
+Character.defense：等级星级防御 + 战斗临时防御增减益；最低为 0。
+
+
+### 3. 玩家如何升级、升星
+
+升级：`main.py` 点击“升级(100金)”；金币足够就扣 100，等级加 1。
+升星：消耗数量等于“当前星级”的同名碎片，然后星级加 1。
+例如 ★1→★2 需要 1 碎片，★2→★3 需要 2 碎片。
+碎片：重复召唤到已拥有的同名角色，duplicates 加 1。
+上限：当前普通养成代码没有设置角色等级/星级上限。
+测试模式的输入框则单独限制为 1～99。
+
+
+### 4. 新增角色具体步骤
+
+
+**第一步：将原始角色图片放入项目根目录 picture/（或准备新美术资源）。**
+
+
+**第二步：在 `config.py` 的 `HERO_CONFIG` 中增加角色，角色名称必须唯一：**
+
 
 ```python
-"示例角色": {
-    "image": "picture/示例角色.png",
-    "hp": 500,
-    "atk": 80,
-    "def": 50,
-    "tag": "单体输出",
-    "skills": [
-        {
-            "name": "破空斩",
-            "target": "enemy_front",
-            "cooldown": 3,
-            "priority": 10,
-            "desc": "对敌方前排造成150%攻击力的伤害",
-            "effects": [
-                {"type": "damage", "multiplier": 1.5}
-            ]
-        }
-    ]
+"示例剑士": {
+    "image": "picture/示例剑士.png",  # 角色原图的相对路径
+    "hp": 500,                     # 1级1星基础生命
+    "atk": 60,                     # 1级1星基础攻击
+    "def": 50,                     # 1级1星基础防御
+    "tag": "单体输出",               # 图鉴定位文本，不影响战斗计算
+    "skill": {
+        "name": "斩击",              # 技能名称
+        "target": "enemy_front",    # 目标规则
+        "cooldown": 3,              # 冷却：按角色自身行动结算
+        "desc": "对敌方前排造成150%攻击力的伤害",  # 展示文本
+        "effects": [
+            {"type": "damage", "multiplier": 1.5}
+        ]
+    }
 },
 ```
 
-字段说明：
 
-| 字段 | 作用 |
-| --- | --- |
-| `image` | 图片路径，以项目根目录为起点，推荐使用 PNG |
-| `hp` | 角色 1 级 1 星的基础生命值 |
-| `atk` | 角色 1 级 1 星的基础攻击力 |
-| `def` | 角色 1 级 1 星的基础防御力 |
-| `tag` | 显示在角色卡片上的定位文字，不直接参与结算 |
-| `skills` | 技能列表；只有一个技能时也可以使用原项目中的 `skill` 字段 |
-| `name` | 技能显示名称 |
-| `target` | 目标选择规则，必须与 `battle.py` 中实现的名称一致 |
-| `cooldown` | 技能释放后的冷却行动轮数 |
-| `priority` | 多个技能同时可用时的释放优先级，数值越大越优先；省略时为 0 |
-| `desc` | 角色页面显示的技能说明，不参与实际计算 |
-| `effects` | 按顺序执行的效果列表 |
+**第三步：在 `config.py` 的 `COMBAT_PRESENTATION` 中追加同名配置：**
 
-一个技能可以组合多个效果。例如先造成伤害，再根据本次实际伤害吸血：
 
 ```python
-"effects": [
-    {"type": "damage", "multiplier": 1.2},
-    {"type": "lifesteal", "multiplier": 0.5}
-]
+"示例剑士": {
+    "style": "melee",              # 近战 melee；远程 ranged
+    "projectile": "bolt",          # 远程投射物类型，近战也须保留字段
+    "facing": (1, 1, 1, 1)         # idle/prepare/release/hit 的原图朝向
+},
 ```
 
-`lifesteal` 使用同一次技能中最近一次 `damage` 的实际伤害进行计算，因此吸血效果应放在伤害效果之后。
 
-新增角色后可以通过召唤获得。如果希望直接测试角色，可以临时修改存档，但必须保证角色 `name` 与 `HERO_CONFIG` 的键完全一致。
+**第四步：如接入 2×2 角色图集，在 `ui.py` 的 `SPRITE_NAMES` 注册唯一资源 ID：**
 
-### 4.3 新增关卡
-
-关卡阵容位于 `Code/Card_Place/config.py` 的 `STAGE_CONFIG` 字典：
 
 ```python
-STAGE_CONFIG = {
-    1: [
-        {"name": "安迷修", "level": 1, "star": 1}
-    ],
-}
+"示例剑士": "hero_38",              # 示例：现有 ID 已用到 hero_37
 ```
 
-新增第 46 关的示例：
+再准备 art/cinematic/poses/hero_38.png 等素材（第七节详述）。
+如暂时只有 picture/ 的原图，可以先不添加 `SPRITE_NAMES` 映射，
+但仍必须添加 `COMBAT_PRESENTATION`，否则战斗显示读取配置会报错。
+
+
+**第五步：用图鉴、召唤、测试战斗检查属性、动作、技能命中与显示效果。**
+
+召唤池由 list(`HERO_CONFIG`.keys()) 自动生成，无须另行登记。
+旧存档不会自动拥有新增角色，需要召唤获取或在测试模式使用。
+
+
+## 四、如何新增关卡：手动配置与自动生成
+
+
+### 1. 手动配置
+
+`config.py` 的 `STAGE_CONFIG` 是字典：键是关卡编号，值是该关敌人列表。
+敌人每项必须包含已存在于 `HERO_CONFIG` 中的 name，
+level（角色等级）和 star（星级）可自定义，缺省时按 1 计算。
+
+例如增加第 46 关：
+
 
 ```python
 46: [
-    {"name": "示例角色", "level": 46, "star": 6},
-    {"name": "帝皇", "level": 46, "star": 6}
+    {"name": "安迷修", "level": 46, "star": 6},
+    {"name": "炎龙", "level": 46, "star": 6},
+    {"name": "巨甲象", "level": 46, "star": 6},
 ],
 ```
 
-注意事项：
+把这一项放进 `STAGE_CONFIG` 字典，注意与相邻条目的逗号、括号。
+现有手动关卡为第 1～45 关；当前战场按最多 6 个敌人阵位设计。
+手动配置的敌人属性同样使用 Character.scale_stat() 计算。
 
-- `name` 必须已经存在于 `HERO_CONFIG` 中。
-- 单个关卡建议不超过 6 名敌人，否则当前战斗 UI 没有额外阵位。
-- `level` 和 `star` 决定敌人的最终属性。
-- 关卡编号是字典的键，不要重复。
 
-未命中 `STAGE_CONFIG` 的更高关卡由 `Code/Card_Place/models.py` 中的 `get_stage_enemies(level)` 生成：它会复用当前最大配置关卡的阵容，每超过 1 关增加 1 级，每超过 5 关再增加 1 星。因此既可以手工配置固定关卡，也可以依靠该逻辑生成无限后续关卡。
+### 2. 当前自动生成逻辑
 
-### 4.4 使用或新增技能目标规则
+`models.py` 的 get_stage_enemies(level) 先检查是否已手动定义该关。
+如果已定义，就直接返回手动配置；否则：
 
-目标规则写在技能的 `target` 字段中，并由 `Code/Card_Place/battle.py` 的 `process_turn()` 负责解释。
+M = `STAGE_CONFIG` 中目前最大的关卡编号；初始为 45。
+delta = 目标关卡 - M
+选取第 M 关的敌方阵容作为模板；对模板里的每名敌人：
+新等级 = 模板等级 + delta
+新星级 = 模板星级 + (delta // 5)
 
-现有敌方目标：
+在原配置未修改时：
+第 45 关：Lv.45，★5（手动）
+第 46 关：Lv.46，★5（自动，复制第45关的角色名单）
+第 49 关：Lv.49，★5
+第 50 关：Lv.50，★6
+第 55 关：Lv.55，★7
 
-| `target` | 选择方式 |
-| --- | --- |
-| `enemy_front` | 第一名存活敌人 |
+重要：如果在 `STAGE_CONFIG` 增加了第 46 关，第 47 关起的自动生成
+会改为以第 46 关为模板；继续新增更高关卡时，自动逻辑同样会跟着变化。
+当前规则不限制自动生成星级上限，后期敌人的属性可能迅速膨胀。
+
+
+### 3. 测试关卡
+
+主界面“测试模式”提供临时配置双方角色、等级、星级的入口。
+通过 `ui.py` 的 TestPicker 编辑阵位，可以先验证难度，不必更改真实存档。
+测试配置仅供本次模拟使用，不会写进正常游戏的 `save_data.json`。
+
+
+## 五、如何新增或调整技能
+
+
+### 1. 技能定义位置
+
+技能写在 `config.py` 的 `HERO_CONFIG`[角色名] 内。
+单技能角色使用 "skill": {...}；多技能角色使用 "skills": [{...}, ...]。
+每个技能可以包含多个 effects，按列表先后顺序执行。
+
+
+**主要字段：**
+
+| 字段 | 作用 |
+|---|---|
+| `name` | 技能显示名称 |
+| `target` | 施法目标，必须由 `battle.py` 识别 |
+| `cooldown` | 释放后设置的冷却值；角色每次自身行动开始时减 1 |
+| `priority` | 多技能排序优先级，越大越靠前，默认为 0 |
+| `desc` | 图鉴描述，仅用于展示 |
+| `effects` | 按顺序结算的技能效果列表 |
+
+角色行动时先将所有冷却值减 1，再选择第一个冷却为 0 的技能；
+没有可释放技能时，执行普通攻击。多个技能同时可用时按
+Character._normalize_skills() 的优先级排序决定先释放哪一个。
+
+
+### 2. 已有技能目标 target
+
+**敌方目标：**
+
+| `target` | 目标选择方式 |
+|---|---|
+| `enemy_front` | 第一名存活敌人（按敌方列表顺序） |
 | `enemy_back` | 最后一名存活敌人 |
-| `enemy_lowest_hp` | 当前生命比例最低的敌人 |
-| `enemy_highest_hp` | 当前生命比例最高的敌人 |
-| `enemy_highest_atk` | 攻击力最高的敌人 |
-| `enemy_higest_def` | 防御力最高的敌人 |
+| `enemy_lowest_hp` | 当前生命百分比最低的敌人 |
+| `enemy_highest_hp` | 当前生命百分比最高的敌人 |
+| `enemy_highest_atk` | 当前攻击力最高的敌人 |
+| `enemy_highest_def` | 当前防御最高的敌人 |
 | `enemy_random` | 随机一名存活敌人 |
-| `enemy_aoe` | 全体存活敌人 |
+| `enemy_aoe` | 所有存活敌人 |
 
-> 注意：当前代码中的“敌方最高防御”键确实拼写为 `enemy_higest_def`，少了一个 `h`。配置必须沿用这个拼写，否则不会进入对应分支。
+**友方及自身目标：**
 
-现有友方及自身目标：
-
-| `target` | 选择方式 |
-| --- | --- |
-| `ally_lowest_hp` | 当前生命比例最低的存活友军 |
-| `ally_highest_atk` | 攻击力最高的存活友军 |
-| `ally_lowest_def` | 防御力最低的存活友军 |
+| `target` | 目标选择方式 |
+|---|---|
+| `ally_lowest_hp` | 当前生命百分比最低的存活友军 |
+| `ally_highest_atk` | 当前攻击最高的存活友军 |
+| `ally_lowest_def` | 当前防御最低的存活友军 |
 | `ally_random` | 随机一名存活友军 |
-| `ally_aoe` | 全体存活友军 |
+| `ally_aoe` | 所有存活友军 |
 | `ally_dead_random` | 随机一名阵亡友军 |
-| `ally_dead_aoe` | 全部阵亡友军 |
-| `self` | 施法者自己 |
+| `ally_dead_aoe` | 所有阵亡友军 |
+| `self` | 自身 |
 
-如果需要新增“选择防御最低的敌人”，修改步骤如下：
+已知配置兼容问题：`config.py` 内“暗魂”的技能 target 当前写成
+"enemy_highest_def"，但 `battle.py` 处理的键是 "enemy_higest_def"。
+因此这个技能目前不会按“最高防御”分支选目标，
+而可能触发“对敌类技能未匹配则默认敌方前排”的回退逻辑。
+如果后续修复，应同步修改配置和目标判断，避免两边拼写不一致。
 
-1. 在角色技能配置中使用新的目标名，例如 `enemy_lowest_def`。
-2. 打开 `battle.py`，在 `process_turn()` 的 `skill_target` 判断链中加入目标筛选。
-3. 保证返回值始终是角色列表，即使只有一个目标也要使用 `[角色]`。
 
-示例实现：
+### 3. 已有技能效果 effects（共 8 类）
 
-```python
-elif skill_target == "enemy_lowest_def" and enemy_pool:
-    real_targets = [min(enemy_pool, key=lambda x: x.defense)]
-```
+| 效果 `type` | 结算说明 |
+|---|---|
+| `damage` | 按 `round(施法者当前攻击 × multiplier)` 得到攻击值；实际伤害为 `max(0, 攻击值 - 目标当前防御)` |
+| `lifesteal` | 按同一技能对当前目标最近一次实际伤害 × `multiplier` 回血，不超过施法者缺失生命 |
+| `heal` | `round(multiplier × (施法者最大生命 + 目标最大生命) / 2)`，不超过目标缺失生命 |
+| `resurrect` | 目标已阵亡才生效；先重置其战斗态，再按治疗同类公式计算复活生命，限制在 1 到最大生命之间 |
+| `buff` | 对 `atk` / `def` 加成：`round(multiplier × (施法者当前属性 + 目标当前属性) / 2)` |
+| `debuff` | 数值计算同 `buff`，从目标战斗加成中扣除，最终实际属性最低为 0 |
+| `control` | `duration` 指定控制次数；目标处于免控状态则控制失败 |
+| `immune` | `duration` 指定免控次数，并立即解除已有控制 |
 
-建议把新分支放在其他 `enemy_*` 分支附近。对敌目标拼写错误时，现有容错逻辑会退回攻击敌方前排，因此测试时应通过战斗日志确认目标选择正确，而不能只看技能是否成功释放。
+> **注意：**`buff` / `debuff` 均以释放时的当前属性计算（包含已有加减益），所以自我强化可复利叠加；目前没有常规的 Buff 过期倒计时。战斗开始或复活时会清除临时攻防加成与控制、免控状态。
 
-### 4.5 使用或新增技能效果类型
 
-技能效果由 `effects` 列表描述，在 `battle.py` 的 `process_turn()` 中按照列表顺序结算。
+### 4. 多效果技能示例
 
-| `type` | 常用字段 | 作用 |
-| --- | --- | --- |
-| `damage` | `multiplier` | 根据施法者攻击力造成伤害 |
-| `lifesteal` | `multiplier` | 根据本技能最近一次实际伤害回复生命 |
-| `heal` | `multiplier` | 回复目标生命 |
-| `resurrect` | `multiplier` | 复活阵亡友军并重置其战斗状态 |
-| `buff` | `stat`、`multiplier` | 提高目标的攻击或防御 |
-| `debuff` | `stat`、`multiplier` | 降低目标的攻击或防御 |
-| `control` | `duration` | 使目标若干回合无法行动 |
-| `immune` | `duration` | 解除控制并获得若干回合免控 |
-
-`buff` 和 `debuff` 的 `stat` 可以写成 `"atk"`、`"def"` 或 `"atk, def"`。
-
-如果新增一种效果，需要同时修改配置和战斗执行逻辑：
-
-1. 在角色技能的 `effects` 中设计新的 `type` 和必要参数。
-2. 在 `battle.py` 的 `for effect in skill.get("effects", [])` 循环内增加新的 `elif e_type == "..."` 分支。
-3. 如果该效果需要持续状态，在 `models.py` 的 `Character` 中增加状态字段，并在 `reset_battle_state()` 和 `reset_on_resurrect()` 中重置。
-4. 在回合开始、行动时或回合结束的正确位置更新持续时间。
-5. 同步补充战斗日志和 `FloatingText`，让玩家能观察到效果。
-
-以“护盾”为例，不能只在配置中写 `{"type": "shield"}`；还需要为 `Character` 增加护盾值、在伤害结算时优先扣除护盾，并明确开战和复活时如何重置。
-
-### 4.6 修改或新增 UI
-
-UI 分为“通用控件”和“具体页面”两部分：
-
-- `Code/Card_Place/ui.py`：适合放多个页面都能复用的控件和绘制函数，例如 `Button`、`draw_text()`、`draw_hp_bar()`、`FloatingText`。
-- `Code/Card_Place/main.py`：负责按钮实例、页面布局、鼠标点击和场景切换。
-
-在已有页面新增按钮时，按照下面的顺序修改：
-
-1. 在 `main()` 开头、现有按钮初始化区域创建 `Button`。
-2. 在对应场景分支中调用 `button.draw(screen, mouse_pos)`。
-3. 在该场景的点击处理内同时判断 `clicked` 和 `button.is_clicked(mouse_pos)`。
-4. 在点击分支中修改 `GameData` 或调用对应功能。
-
-示例：
 
 ```python
-# 1. 初始化按钮
-btn_test = Button(100, 100, 160, 50, "测试按钮", BLUE, WHITE)
-
-# 2. 在目标场景中绘制
-btn_test.draw(screen, mouse_pos)
-
-# 3. 处理点击
-if clicked and btn_test.is_clicked(mouse_pos):
-    game.sys_message = "测试按钮已点击"
+"skill": {
+    "name": "破甲斩",
+    "target": "enemy_front",
+    "cooldown": 4,
+    "desc": "对前排造成120%攻击伤害，并降低其20%防御",
+    "effects": [
+        {"type": "damage", "multiplier": 1.2},
+        {"type": "debuff", "stat": "def", "multiplier": 0.2}
+    ]
+}
 ```
 
-新增完整场景时，按照下面的顺序修改：
 
-1. 为新场景确定唯一字符串，例如 `SETTINGS`。
-2. 在主循环的场景判断链中增加 `elif game.current_scene == "SETTINGS":`，完成该页面的绘制和事件处理。
-3. 增加进入该场景的按钮，并在点击时执行 `game.current_scene = "SETTINGS"`。
-4. 增加返回按钮，确保能够回到 `LEVEL` 或其他已有场景。
-5. 判断底部导航栏是否应该在新场景显示；当前导航栏只在 `BATTLE` 和 `SETTLEMENT` 之外显示。
+### 5. 新增全新的技能类型
 
-如果只是修改字体、按钮样式、血条或图片缩放，应优先修改 `ui.py`，避免在每个场景重复绘制代码。
+不要只给 effects 填一个新的 "type" 字符串，否则目前不会被结算。
+应同时：
+- ① 在 `config.py` 角色技能中定义 type 及参数。
+- ② 在 `battle.py`/process_turn() 的效果循环中添加对应的处理分支。
+- ③ 如涉及持续状态，在 `models.py`/Character 中定义状态，且在
+reset_battle_state()、reset_on_resurrect() 等重置逻辑中维护。
+- ④ 在 `ui.py`/draw_effects() 为新效果添加必要的演出（可选但推荐）。
+- ⑤ 检查伤害、治疗、战报、浮动文字与冷却顺序是否一致。
 
-### 4.7 修改角色成长、伤害和挂机收益
 
-主要数值入口位于 `Code/Card_Place/models.py`：
+### 6. 普攻与技能的动作关系
 
-- `Character.scale_stat()`：根据等级和星级计算生命、攻击和防御。
-- `Character.max_hp`、`Character.atk`、`Character.defense`：返回角色实时属性。
-- `Character.take_damage()`：使用攻击力减防御力计算实际伤害。
-- `GameData.get_idle_rate()`：计算每秒挂机金币收益。
-- `GameData.advance_level()`：胜利后的关卡推进逻辑。
+普攻和技能是不同结算行为，但通常共用角色图集中的 prepare/release。
+近战对敌行动会前进接近目标、命中后返回；远程对敌行动原地施法
+并通过 projectile 类型显示飞行特效；对自身或友军的技能按 support
+辅助演出处理，通常不冲向敌方。
+默认四姿势：idle（待机）、prepare（蓄力）、release（出招）、hit（受击）。
+人物动作来自角色图集；技能光环、箭矢、火焰、治疗符号等主要由
+`ui.py` 中的绘制逻辑生成，不能把技能特效误认为来自第五张动作图片。
 
-修改公式后，需要同时测试低等级、高等级、高星级、零伤害和临时 Buff/Debuff 场景，避免数值过快膨胀或出现负数。
 
-### 4.8 修改存档字段
+## 六、UI 页面与交互应该如何修改
 
-存档逻辑位于 `Code/Card_Place/models.py`：
+`main.py`：负责何时显示页面、创建按钮和响应鼠标/键盘操作。
+`ui.py`：负责页面具体绘制、人物/卡牌/按钮样式、图片与动作渲染。
 
-- `GameData.save_game()`：将运行时数据转换成字典并写入 JSON。
-- `GameData.load_game()`：读取 JSON 并恢复角色、养成和阵位。
 
-新增字段时必须同时修改保存和读取。例如增加钻石：
+**主要页面：**
 
-```python
-# GameData.__init__ 中初始化
-self.diamond = 0
+| 场景 | 功能 |
+|---|---|
+| `LEVEL` | 关卡、双方阵容、战斗入口和测试模式 |
+| `HERO` | 角色图鉴、立绘、属性、技能、升级升星和上阵 |
+| `GACHA` | 单抽、十连展示 |
+| `BATTLE` | 战场、血条、动作和战报 |
+| `SETTLEMENT` | 战斗结算与奖励 |
 
-# save_game() 的 data 中写入
-"diamond": self.diamond
+**关键 UI 函数及对象：**
 
-# load_game() 中读取，并为旧存档提供默认值
-self.diamond = data.get("diamond", 0)
-```
+| `ui.py` 函数或类 | 作用 |
+|---|---|
+| `draw_home()` | 关卡与布阵卡片 |
+| `draw_hero_page()` | 图鉴、当前属性、技能描述 |
+| `draw_summon()` | 抽卡展示 |
+| `draw_battlefield()` | 战场人物、血条、受击、技能名称 |
+| `draw_effects()` | 技能特效 |
+| `ArtButton` | 美术按钮 |
+| `DetailViewer` | 高清立绘、历史战报窗口 |
+| `TestPicker` | 测试模式选人与编辑等级星级 |
 
-读取新字段时应使用 `data.get("字段", 默认值)`，这样旧存档中没有该字段也能继续运行。修改存档结构前建议备份 `save_data.json`。
+**新增按钮通常需要四步：**
 
-## 5. 常见问题
+- ① 在 `main.py`/main() 的初始化区创建按钮。
+- ② 在目标场景绘制时调用按钮的 draw()。
+- ③ 在同一场景事件处理中通过 is_clicked() 判定点击。
+- ④ 点击后修改 GameData 状态或调用对应方法，并检查模态窗口
+是否需要拦截底层点击。
 
-### 5.1 `ModuleNotFoundError: No module named 'pygame'`
 
-原因通常是 Pygame 没有安装，或者安装 Pygame 和运行游戏使用了不同的 Python 解释器。
+**新增页面通常需要：**定义唯一场景名称 → 增加入口按钮 → 在 `main.py` 的 `current_scene` 分支中调用对应 `ui.py` 绘制逻辑 → 补充返回导航和交互。
 
-```powershell
-python -m pip install pygame
-python -c "import sys, pygame; print(sys.executable); print(pygame.version.ver)"
-```
+若要显示“1级1星基础属性”，可直接读取 selected.base_hp / base_atk /
+base_def；而 selected.max_hp / atk / defense 显示的是当前属性。
+切勿把战斗过程中的 battle_atk_bonus 当作永久属性写进角色配置。
 
-在 PyCharm 中检查 **Python Interpreter** 是否与上面输出的解释器一致。
+当前源码的基础布局采用 WIDTH=1280、HEIGHT=800（`config.py`），
+许多组件坐标是按这一分辨率编写。更改布局大小时需同时检查
+`main.py` 的按钮位置、`ui.py` 的矩形坐标、背景图片缩放和鼠标命中区域。
 
-### 5.2 角色图片不显示，只出现灰色占位图
 
-依次检查：
+## 七、游戏需要的图片资源在哪里
 
-1. 是否打开并保留了完整的 `Game` 项目结构。
-2. 图片是否位于根目录的 `picture` 文件夹。
-3. `HERO_CONFIG` 中的 `image` 路径、中文文件名和扩展名是否完全正确。
-4. 是否从项目根目录运行 `python Code\Card_Place\main.py`。
+注意：以下路径从项目根目录 Game/ 起算，不是以 Code/Card_Place/ 为根目录。
 
-图片加载失败时，`ui.py` 的 `load_image()` 会生成灰色占位图，而不是直接终止游戏。
 
-### 5.3 中文显示异常或字体不正确
+**1. picture/角色图片.png**
+- `config.py` 的 `HERO_CONFIG`[角色名]["image"] 中配置的原始角色图片。
+- 若对应的新版动作图/归档图不存在，头像和战场可能回退到这些图片。
 
-`ui.py` 当前通过 `pygame.font.SysFont("SimHei", ...)` 使用黑体。如果系统没有该字体，可以安装黑体，或者把字体名修改为系统已有的中文字体，例如 `Microsoft YaHei`。
 
-修改后重新启动游戏；字体在程序启动时初始化，运行过程中修改不会自动刷新。
+**2. art/cinematic/poses/hero_00.png ～ hero_37.png**
+- 38 名现有角色的新动作 2×2 图集，与 `ui.py`/SPRITE_NAMES 一一对应。
+- 四格位置固定：左上 idle，右上 prepare，左下 release，右下 hit。
+- 一张图可提供该角色的四种基础姿势；并非“普攻一套、技能一套”。
+- 图片需考虑透明背景、各姿势的大小、角色朝向和一致性。
 
-### 5.4 显示“读取异常，开启新对局”
 
-通常表示 `save_data.json` 不是合法 JSON、字段类型被手工改错，或者角色名称与配置不一致。
+**3. art/archive/faithful/hero_00.png ～ hero_37.png**
+- 新动作图缺失时的归档四姿势图集回退来源。
+- 新旧素材按角色资源 ID 查找；不建议随意重命名。
 
-处理方式：
 
-1. 退出游戏。
-2. 备份当前 `save_data.json`。
-3. 使用编辑器检查 JSON 是否缺少逗号、引号或括号。
-4. 无法修复时删除存档，让游戏重新创建初始进度。
+**4. art/cinematic/portraits/hero_00.png ～ hero_37.png**
+- 独立高清立绘，主要用于大图查看、卡牌/角色展示。
+- 缺失时会尝试从对应动作图集中提取待机姿势。
 
-### 5.5 修改角色或关卡后没有看到变化
 
-- 新增角色不会自动加入已有账号，需要通过召唤获得或重新开始存档。
-- 修改角色名称后，旧存档仍保存原名称，建议同步迁移存档或重新开始。
-- 修改当前关卡之后，需要退出正在进行的战斗并重新进入关卡。
-- Python 文件修改后必须重新启动程序。
-- 如果 PyCharm 运行了其他同名文件，请再次检查启动配置的 Script path。
+**5. art/illustrated/arena.png**
+- 战场背景；在 `ui.py`/arena_background() 中加载。
 
-### 5.6 修改 `config.py` 后出现 `SyntaxError`
 
-角色和关卡使用嵌套字典与列表，最常见的问题是漏写逗号、引号或右括号。可以在项目根目录执行语法检查：
+**6. art/cinematic/ui/home.png**
+- 关卡界面背景。
+art/cinematic/ui/hero.png
+- 角色图鉴背景。
+art/cinematic/ui/summon.png
+- 召唤界面背景。
+art/cinematic/ui/widgets.png
+- 2×2 美术控件图集（包括按钮及召唤卡背）。
+art/cinematic/ui/icons.png
+- 导航图标图集（战斗、角色、召唤等）。
 
-```powershell
-python -m py_compile Code\Card_Place\config.py
-```
 
-命令没有输出表示语法检查通过；如有错误，会显示具体文件和行号。
+**资源映射与使用函数：**
 
-## 6. 修改后的检查清单
+`ui.py`/SPRITE_NAMES          中文角色名 → hero_XX 资源 ID。
+`ui.py`/load_image()          根据路径读取图片并缓存。
+`ui.py`/load_portrait()       加载角色缩略立绘。
+`ui.py`/display_art()         优先高清 portrait，缺失则使用动作图/原图。
+`ui.py`/atlas_frame()         从动作 2×2 图集中裁切单个姿势。
+`ui.py`/battle_sprite()       缩放、翻转并返回战场角色姿势。
+`config.py`/COMBAT_PRESENTATION
+style="melee" / "ranged" 决定对敌行动采用近战位移还是远程演出；
+projectile 可用 bolt、blade、arrow、wave、fire；
+facing 为四种姿势的原始左右朝向。
+`ui.py`/CINEMATIC_FACING      对已接入的新图集进行额外朝向校准。
 
-每次扩展功能后，建议依次确认：
+新增角色图片建议：
+先确保 picture/ 原图可加载；如需完整人物动作，分配唯一 hero_XX；
+添加 poses 和 portraits 后检查四格位置、透明度、出招方向及受击帧。
+新增 UI 美术图不应只加入文件夹，还需要在 `ui.py` 相应绘制函数中加载。
 
-- `config.py` 能通过 `py_compile` 语法检查。
-- 新角色图片能够正常加载，名称与配置键一致。
-- 新关卡的所有敌人都存在于 `HERO_CONFIG`。
-- 新目标规则能够选中预期角色。
-- 新技能效果能够正确处理死亡目标、空目标和多目标。
-- Buff、控制等持续状态能在新战斗和复活时正确重置。
-- 战斗日志、浮动文字和结算统计与实际数值一致。
-- 保存并重启游戏后，金币、关卡、角色和阵位能够恢复。
 
-完成以上检查后，再保留或提交新的 `save_data.json`，避免把调试进度误当成默认存档。
+## 八、存档与修改后检查
+
+存档路径：Code/Card_Place/save_data.json
+存档字段：gold（金币）、level（关卡编号）、heroes（角色列表）。
+角色记录包含 name、level、star、duplicates、pos（阵位，-1 未上阵）。
+当前 `main.py` 通过“进度保存”按钮调用 GameData.save_game()；
+GameData.load_game() 在正常启动时读取。测试模式使用独立的 GameData。
+
+
+**建议修改检查顺序：**
+
+- ① 保留源码和存档备份，在副本上修改，勿直接覆盖正常版本。
+- ② 检查 `config.py` 语法、`HERO_CONFIG` 名称、技能 target 拼写。
+- ③ 检查新增角色 `COMBAT_PRESENTATION` 与美术资源映射。
+- ④ 使用 1级1星 / 高等级高星级验证数值计算。
+- ⑤ 验证伤害、治疗、控制、强化、复活是否按预期结算。
+- ⑥ 验证手动关卡和超出最大关卡后的自动生成逻辑。
+- ⑦ 进入战斗与角色图鉴，检查动画、文本换行、按钮命中区域。
+- ⑧ 手动存档、重启并检查等级/星级/阵位能否正常恢复。
+
+
+## 附录：38 名现有角色的基础属性（均为 1 级、1 星）
+
+
