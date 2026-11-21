@@ -12,7 +12,7 @@ Button = ArtButton
 from models import Character, GameData
 from battle import process_turn, refresh_skill_ready_highlights
 
-MAX_ROUNDS = 30
+MAX_ROUNDS = 50
 
 def start_battle(game):
     game.current_scene, game.battle_result, game.is_paused = "BATTLE", "", False
@@ -45,7 +45,10 @@ def start_battle(game):
 def snapshot_team_status(game):
     # 回合先用原逻辑结算，演出在命中前暂时显示行动前的血量与状态。
     return {
-        (side, index): (hero.current_hp, hero.stun_turns, hero.immune_turns, hero.skill_ready_highlight)
+        (side, index): (
+            hero.current_hp, hero.stun_turns, hero.immune_turns,
+            hero.skill_ready_highlight, sum(hero.shields.values()),
+        ) # 保存命中前的状态，让血量和护盾在同一帧更新。
         for side, party in (("ally", game.deployed_party), ("enemy", game.enemy_party))
         for index, hero in enumerate(party) if hero
     }

@@ -1,4 +1,9 @@
-角色：现有类型遍历（），同归于尽，百分比伤害
+角色：
+现有类型遍历：
+前排：回血、加防、护盾；
+增益辅助：群体加攻、单体加攻、单体加防、群体加防、单体治疗、群体治疗、单体复活、群体复活、单体控制、群体控制、单体免控、群体免控、单体护盾、群体护盾、
+
+待加：百分比生命最低护盾，同归于尽，百分比伤害，永久增加生命上限
 
 
 # Card Place（卡牌放置）——项目说明与内容扩展指南
@@ -6,6 +11,8 @@
 ## 一、项目是什么
 
 Card Place 是使用 Python + Pygame 开发的单机放置式卡牌战斗游戏。玩家通过召唤角色获得卡牌，重复召唤转化为同名碎片；使用金币提升等级、使用碎片提高星级，最多选择 6 名角色布阵并挑战自动战斗关卡。
+
+python Code/Card_Place/main.py
 
 
 **主要玩法：**
@@ -250,8 +257,8 @@ Character._normalize_skills() 的优先级排序决定先释放哪一个。
 |---|---|
 | `enemy_front` | 第一名存活敌人（按敌方列表顺序） |
 | `enemy_back` | 最后一名存活敌人 |
-| `enemy_lowest_hp` | 当前生命百分比最低的敌人 |
-| `enemy_highest_hp` | 当前生命百分比最高的敌人 |
+| `enemy_lowest_hp_ratio` | 当前生命百分比最低的敌人 |
+| `enemy_highest_hp_ratio` | 当前生命百分比最高的敌人 |
 | `enemy_highest_atk` | 当前攻击力最高的敌人 |
 | `enemy_highest_def` | 当前防御最高的敌人 |
 | `enemy_random` | 随机一名存活敌人 |
@@ -261,7 +268,8 @@ Character._normalize_skills() 的优先级排序决定先释放哪一个。
 
 | `target` | 目标选择方式 |
 |---|---|
-| `ally_lowest_hp` | 当前生命百分比最低的存活友军 |
+| `ally_lowest_hp_ratio` | 当前生命百分比最低的存活友军 |
+| `ally_lowest_current_hp` | 当前剩余生命点数最低的存活友军，同值时优先选择阵位靠前者 |
 | `ally_highest_atk` | 当前攻击最高的存活友军 |
 | `ally_lowest_def` | 当前防御最低的存活友军 |
 | `ally_random` | 随机一名存活友军 |

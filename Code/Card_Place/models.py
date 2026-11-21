@@ -23,6 +23,7 @@ class Character:
         self.battle_def_bonus = 0 
         self.stun_turns = 0 
         self.immune_turns = 0  # 【新增】免控剩余回合数
+        self.shields = {}  # 键为（施法者实例，技能名），值为该来源的剩余护盾。
         self.skill_ready_highlight = False
         # 【新增】动画坐标偏移量
         self.offset_x = 0
@@ -38,6 +39,7 @@ class Character:
         self.battle_def_bonus = 0 
         self.stun_turns = 0 
         self.immune_turns = 0  # 【新增】战斗结束后重置免控状态
+        self.shields.clear()  # 新战斗或复活时清空上一次生命状态遗留的护盾。
         self.skill_ready_highlight = False
         # 【新增】重置动画偏移
         self.offset_x = 0
@@ -61,6 +63,7 @@ class Character:
         self.battle_def_bonus = 0
         self.stun_turns = 0
         self.immune_turns = 0
+        self.shields.clear() # 新战斗或复活时清空上一次生命状态遗留的护盾。
         self.skill_ready_highlight = False
         self.offset_x = 0
         self.offset_y = 0
@@ -116,9 +119,24 @@ class Character:
         return max(0, base + self.battle_def_bonus)
 
     def take_damage(self, attacker_atk):
+        # 先按原规则结算防御，再用护盾抵消本次伤害。
         damage = max(0, attacker_atk - self.defense)
+
+        # 不同来源按首次添加顺序消耗；遍历键的副本，允许删除耗尽的护盾。
+        for source in tuple(self.shields):
+            if damage == 0:
+                break
+
+            absorbed = min(damage, self.shields[source])
+            damage -= absorbed
+            self.shields[source] -= absorbed
+
+            if self.shields[source] == 0:
+                del self.shields[source]
+
+        # 剩余伤害沿用原有扣血和统计流程；完全挡住时返回 0。
         self.current_hp -= damage
-        self.dmg_taken += damage 
+        self.dmg_taken += damage
         return damage
 
 def get_stage_enemies(level):
@@ -221,7 +239,7 @@ class GameData:
     def load_game(self):
         if not SAVE_PATH.exists():
             self.gold = 1000
-            first_hero_name = list(HERO_CONFIG.keys())[0]
+            first_hero_name = "帝皇"
             self.add_hero(first_hero_name)
             self.deployed_party[0] = self.owned_heroes[0]
             return "欢迎游玩！初始物资已发放"

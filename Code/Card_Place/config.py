@@ -25,10 +25,25 @@ def battle_position(slot, is_enemy):
 
 # 角色与技能配置（hp:100~1000, atk:10~100, def:10~100；角色可使用单个 skill 或 skills 列表；skills 中每个技能可配置 priority，优先级越高越先释放；damage类multiplier按施法者攻击结算；heal/buff/debuff按施法者与目标各50%的对应属性混合结算；lifesteal按刚造成的实际伤害 * multiplier 回血；resurrect按施法者与目标各50%最大生命值混合后 * multiplier 复活，并重置目标战斗态，cd）
 
-# presentation 同时控制普攻和对敌技能，友方辅助技能按技能效果绘制。
+# presentation 同时控制普攻和对敌技能，友方辅助技能按技能效果绘制，绘图函数实时生成，不需要额外准备图片素材。
 # style：melee 近战突进 / ranged 远程施放；color：特效主色，可填 (红, 绿, 蓝)。
-# projectile：远程弹道，省略时使用 bolt。可选 bolt 光弹、blade 剑气、arrow 箭矢、fire 火球、wave 水波、ice 冰晶、poison 毒泡、shadow 暗影。
-# impact：近远程通用，可选 slash 斩痕、thrust 穿刺、claw 爪痕、spark 冲击光、shatter 碎冰、mist 毒雾、collapse 暗影收缩。
+# projectile：远程攻击的飞行特效，省略时默认 bolt。
+#   bolt    ：光弹——发光的圆形能量球，沿直线飞向目标。
+#   blade   ：月牙剑气——弯曲的月牙形剑刃光波，向目标飞射。
+#   arrow   ：箭矢——由细长箭杆和尖锐箭头组成，沿直线飞行。
+#   fire    ：火球——圆形火焰能量团，带有火焰光晕或拖尾。
+#   wave    ：水波——圆环状水纹向前传播，呈波浪扩散效果。
+#   ice     ：冰晶——带有尖角的菱形或多棱晶体，向目标飞射。
+#   poison  ：毒泡——圆形或椭圆形毒液气泡，向目标飘动。
+#   shadow  ：暗影——不规则的暗色能量团，伴随暗影拖尾飞行。
+# impact：攻击命中目标时的特效，近战和远程均可使用。
+#   slash   ：斩痕——目标位置出现弧形或月牙形斩击轨迹。
+#   thrust  ：穿刺——目标位置出现细长、尖锐的直线穿刺光芒。
+#   claw    ：爪痕——目标位置出现数道平行或倾斜的抓挠痕迹。
+#   spark   ：冲击波——以命中点为中心，圆形光圈向外快速扩散。
+#   shatter ：碎冰——命中点产生多个尖锐冰晶碎片，向四周飞散。
+#   mist    ：毒雾——命中点产生团状雾气，向周围弥漫并逐渐消散。
+#   collapse：暗影收缩——目标周围的暗色能量向中心聚拢、收缩。
 HERO_CONFIG = {
     "艾莎": {
         "presentation": {"style": "ranged", "projectile": "ice", "impact": "shatter", "color": (127, 219, 255)},
@@ -124,7 +139,7 @@ HERO_CONFIG = {
         "presentation": {"style": "melee", "impact": "slash", "color": RED},
         "hp": 400, "atk": 90, "def": 50, "tag": "坦克杀手",
         "skill": {
-            "name": "骑士战魂", "target": "enemy_highest_hp", "cooldown": 3,
+            "name": "骑士战魂", "target": "enemy_highest_hp_ratio", "cooldown": 3,
             "desc": "燃烧灵魂进入战斗状态，对敌方血量百分比最高的目标造成黑骑女将300%攻击力的伤害",
             "effects": [{"type": "damage", "multiplier": 3.0}]
         }
@@ -214,7 +229,7 @@ HERO_CONFIG = {
         "presentation": {"style": "ranged", "projectile": "bolt", "impact": "spark", "color": (224, 230, 255)},
         "hp": 200, "atk": 80, "def": 20, "tag": "残血收割",
         "skill": {
-            "name": "幽冥·瞬狱杀", "target": "enemy_lowest_hp", "cooldown": 1,
+            "name": "幽冥·瞬狱杀", "target": "enemy_lowest_hp_ratio", "cooldown": 1,
             "desc": "召唤骷髅头，对敌方血量百分比最低的单体造成傀儡女王100%攻击力的致命打击",
             "effects": [{"type": "damage", "multiplier": 1.0}]
         }
@@ -226,6 +241,18 @@ HERO_CONFIG = {
             "name": "喷射火焰", "target": "enemy_random", "cooldown": 1,
             "desc": "向敌方随机单体喷射火焰，造成烈火战龙100%攻击力的灼烧伤害",
             "effects": [{"type": "damage", "multiplier": 1.0}]
+        }
+    },
+    "轮回神官·钟馗": {
+        # 判官笔以青玉色灵光普攻，生死簿用于单体招魂。
+        "presentation": {
+            "style": "ranged", "projectile": "bolt", "impact": "spark", "color": (100, 222, 174)
+        },
+        "hp": 600, "atk": 45, "def": 50, "tag": "单体复活",
+        "skill": {
+            "name": "朱笔还魂", "target": "ally_dead_random", "cooldown": 20,
+            "desc": "以判官笔勾回魂魄，随机复活我方一名阵亡角色，将其生命恢复至钟馗与该目标最大生命值均值的20%。",
+            "effects": [{"type": "resurrect", "multiplier": 0.20}]
         }
     },
     "美杜莎": {
@@ -244,6 +271,18 @@ HERO_CONFIG = {
             "name": "倾城乱心", "target": "enemy_aoe", "cooldown": 6,
             "desc": "睁开狐媚之眼，魅惑敌方全体1回合",
             "effects": [{"type": "control", "duration": 1}]
+        }
+    },
+    "涅槃神凰": {
+        # 赤金凰火用于普攻，展翼释放群体复活。
+        "presentation": {
+            "style": "ranged", "projectile": "fire", "impact": "spark", "color": (255, 147, 56)
+        },
+        "hp": 550, "atk": 55, "def": 40, "tag": "群体复活",
+        "skill": {
+            "name": "涅槃重生", "target": "ally_dead_aoe", "cooldown": 30,
+            "desc": "洒下涅槃之火，复活我方所有阵亡角色。每名目标的生命分别恢复至神凰与该目标最大生命值均值的10%。",
+            "effects": [{"type": "resurrect", "multiplier": 0.10}]
         }
     },
     "女武神": {
@@ -268,7 +307,7 @@ HERO_CONFIG = {
         "presentation": {"style": "ranged", "projectile": "bolt", "impact": "spark", "color": (154, 197, 255)},
         "hp": 700, "atk": 50, "def": 60, "tag": "单体治疗",
         "skill": {
-            "name": "扶摇直上", "target": "ally_lowest_hp", "cooldown": 5,
+            "name": "扶摇直上", "target": "ally_lowest_hp_ratio", "cooldown": 5,
             "desc": "天降祥瑞，恢复我方血量百分比最低的单体：七彩鲲鹏与目标最大生命值均值的50%的血量",
             "effects": [{"type": "heal", "multiplier": 0.5}]
         }
@@ -289,6 +328,28 @@ HERO_CONFIG = {
             "name": "柔情似水", "target": "ally_highest_atk", "cooldown": 5,
             "desc": "以极致的服务提升我方攻击力最高的单体：若溪与目标攻击力均值的50%的攻击属性值",
             "effects": [{"type": "buff", "stat": "atk", "multiplier": 0.5}]
+        }
+    },
+    "神圣玄武": {
+        # 普攻使用青玉色近战爪击；对自身施放护盾时自动切换为辅助演出。
+        "presentation": {"style": "melee", "impact": "claw", "color": (76, 224, 193)},
+        "hp": 900, "atk": 30, "def": 60, "tag": "前排护盾",
+        "skill": {
+            "name": "神圣守护", "target": "self", "cooldown": 2,
+            "desc": "为自身附加最大生命值20%的护盾",
+            "effects": [{"type": "shield", "multiplier": 0.20}]
+        }
+    },
+     "圣翼天使": {
+        # 金色光弹普攻，技能为单体护盾。
+        "presentation": {
+            "style": "ranged", "projectile": "bolt", "impact": "spark", "color": (255, 215, 128)
+        },
+        "hp": 600, "atk": 30, "def": 50, "tag": "单体护盾",
+        "skill": {
+            "name": "圣翼守护", "target": "ally_lowest_current_hp", "cooldown": 5,
+            "desc": "以圣翼守护当前生命值最低的一名存活友军，护盾量为圣翼天使与目标最大生命值均值的50%。",
+            "effects": [{"type": "shield", "multiplier": 0.50}]
         }
     },
     "兽神王": {
@@ -328,11 +389,23 @@ HERO_CONFIG = {
     },
     "小花仙": {
         "presentation": {"style": "ranged", "projectile": "bolt", "impact": "spark", "color": (246, 174, 224)},
-        "hp": 500, "atk": 30, "def": 40, "tag": "群体回血",
+        "hp": 500, "atk": 30, "def": 40, "tag": "群体治疗",
         "skill": {
             "name": "繁花映血", "target": "ally_aoe", "cooldown": 12,
             "desc": "唤起生命花海，为我方全体恢复：小花仙与目标最大生命值均值的20%的血量",
             "effects": [{"type": "heal", "multiplier": 0.2}]
+        }
+    },
+    "星辉圣女": {
+        # 银紫色光弹普攻，技能为全体护盾。
+        "presentation": {
+            "style": "ranged", "projectile": "bolt", "impact": "spark", "color": (188, 168, 255)
+        },
+        "hp": 600, "atk": 30, "def": 50, "tag": "群体护盾",
+        "skill": {
+            "name": "星辉庇佑", "target": "ally_aoe", "cooldown": 2,
+            "desc": "为我方全体存活角色附加护盾，每名角色的护盾量分别取星辉圣女与该角色最大生命值均值的20%。",
+            "effects": [{"type": "shield", "multiplier": 0.20}]
         }
     },
     "萧炎": {

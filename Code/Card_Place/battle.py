@@ -24,21 +24,32 @@ def effect_position(slot, is_enemy):
     return x, y - 106
 
 
-def can_cast_skill_next_turn(character):
-    return bool(character and character.current_hp > 0 and character.skills and any(cd <= 1 for cd in character.current_cds))
-
-def get_castable_skill(actor):
-    if not actor or not actor.skills:
+def get_castable_skill(actor, party, *, ready_in=0):
+    # 实际行动时检查 CD=0；预测下一次行动时允许 CD=1。
+    if not actor or actor.current_hp <= 0:
         return None, None
+
     for idx, skill in enumerate(actor.skills):
-        if actor.current_cds[idx] == 0:
-            return idx, skill
+        if actor.current_cds[idx] > ready_in:
+            continue
+
+        # 复活技能需要己方存在阵亡角色；空阵位不算阵亡。
+        if skill.get("target") in ("ally_dead_random", "ally_dead_aoe"):
+            if not any(ally and ally.current_hp <= 0 for ally in party):
+                continue
+
+        return idx, skill
+
     return None, None
 
+
 def refresh_skill_ready_highlights(game):
-    for character in list(game.deployed_party) + list(game.enemy_party):
-        if character:
-            character.skill_ready_highlight = can_cast_skill_next_turn(character)
+    # 分阵营检查，让复活技能只在本方有人阵亡时点亮。
+    for party in (game.deployed_party, game.enemy_party):
+        for hero in party:
+            if hero:
+                _, skill = get_castable_skill(hero, party, ready_in=1)
+                hero.skill_ready_highlight = skill is not None
 
 def process_turn(game, combat_log, floating_texts):
     """
@@ -111,7 +122,9 @@ def process_turn(game, combat_log, floating_texts):
                 acted = True 
             else:
                 # 技能释放判定
-                skill_idx, skill = get_castable_skill(actor)
+                # 传入当前行动者所属阵营，供复活技能检查阵亡队友。
+                party = game.enemy_party if is_enemy else game.deployed_party
+                skill_idx, skill = get_castable_skill(actor, party)
                 if skill:
                     action.skill = skill["name"]
                     action.skill_description = skill.get("desc", "")
@@ -136,10 +149,10 @@ def process_turn(game, combat_log, floating_texts):
                     elif skill_target == "enemy_back" and enemy_pool:
                         # 敌方最后顺位 (切后排)
                         real_targets = [enemy_pool[-1]]
-                    elif skill_target == "enemy_lowest_hp" and enemy_pool:
+                    elif skill_target == "enemy_lowest_hp_ratio" and enemy_pool:
                         # 敌方血量百分比最低 (残血收割)
                         real_targets = [min(enemy_pool, key=lambda x: x.current_hp / x.max_hp)]
-                    elif skill_target == "enemy_highest_hp" and enemy_pool:
+                    elif skill_target == "enemy_highest_hp_ratio" and enemy_pool:
                         # 敌方血量百分比最高 (巨人杀手)
                         real_targets = [max(enemy_pool, key=lambda x: x.current_hp / x.max_hp)]
                     elif skill_target == "enemy_highest_atk" and enemy_pool:
@@ -156,9 +169,12 @@ def process_turn(game, combat_log, floating_texts):
                         real_targets = enemy_pool
 
                     # ================= 我方目标系列 =================
-                    elif skill_target == "ally_lowest_hp" and ally_pool:
+                    elif skill_target == "ally_lowest_hp_ratio" and ally_pool:
                         # 我方血量百分比最低 (精准急救)
                         real_targets = [min(ally_pool, key=lambda x: x.current_hp / x.max_hp)]
+                    elif skill_target == "ally_lowest_current_hp" and ally_pool:
+                        # 按当前生命点数选择，包含施法者自身；同血量时优先靠前的阵位。
+                        real_targets = [min(ally_pool, key=lambda hero: hero.current_hp)]
                     elif skill_target == "ally_highest_atk" and ally_pool:
                         # 我方攻击最高 (精准辅助/挂Buff)
                         real_targets = [max(ally_pool, key=lambda x: x.atk)]
@@ -205,12 +221,22 @@ def process_turn(game, combat_log, floating_texts):
                             mult = effect.get("multiplier", 1.0)
                             
                             if e_type == "damage":
+                                shield_before = sum(t.shields.values())
                                 dmg = t.take_damage(round(actor.atk * mult))
+
+                                # 显示值包含本次打掉的护盾和穿透护盾的伤害。
+                                absorbed = shield_before - sum(t.shields.values())
+                                shown_damage = dmg + absorbed
+
+                                # 吸血与战后输出统计继续沿用原来的扣血量。
                                 last_damage_dealt = dmg
                                 actor.dmg_dealt += dmg
                                 action.hits.add(game.current_target)
-                                msg_parts.append((f"受到 {dmg} 伤害", BLACK))
-                                floating_texts.append(FloatingText(base_x + random.randint(-15, 15), base_y + float_delay, f"-{dmg}", PURPLE))
+                                msg_parts.append((f"受到 {shown_damage} 伤害", BLACK))
+                                floating_texts.append(FloatingText(
+                                    base_x + random.randint(-15, 15),
+                                    base_y + float_delay, f"-{shown_damage}", PURPLE
+                                ))
                                 float_delay -= 25
 
                             elif e_type == "lifesteal":
@@ -223,7 +249,28 @@ def process_turn(game, combat_log, floating_texts):
                                         msg_parts.append((f"{actor.name} 吸血 {actual_heal} 生命", GREEN))
                                         floating_texts.append(FloatingText(actor_fx_x + random.randint(-15, 15), actor_fx_y + float_delay, f"+{actual_heal}", GREEN))
                                         float_delay -= 25
-                                
+
+                            elif e_type == "shield":
+                                # 使用现有辅助技能公式，按当前目标分别计算并四舍五入。
+                                amount = get_support_effect_value(mult, actor.max_hp, t.max_hp)
+
+                                # 同一施法者的同一技能取“旧盾剩余值”和“新盾值”的较大值。
+                                # 其他施法者或其他技能拥有独立的护盾记录。
+                                source = (actor, skill["name"])
+                                old_shield = t.shields.get(source, 0)
+                                new_shield = max(old_shield, amount)
+                                t.shields[source] = new_shield
+
+                                # 飘字显示实际增加量；满盾重复施放时显示“护盾维持”。
+                                gained = new_shield - old_shield
+                                total_shield = sum(t.shields.values())
+                                shield_text = f"护盾 +{gained}" if gained else "护盾维持"
+                                msg_parts.append((f"{shield_text}，当前总护盾 {total_shield}", BLUE))
+                                floating_texts.append(FloatingText(
+                                    base_x, base_y + float_delay, shield_text, BLUE
+                                ))
+                                float_delay -= 25
+
                             elif e_type == "heal":
                                 heal_amt = get_support_effect_value(mult, actor.max_hp, t.max_hp)
                                 actual_heal = min(t.max_hp - t.current_hp, heal_amt)
@@ -318,7 +365,11 @@ def process_turn(game, combat_log, floating_texts):
                     enemy_pool = [e for e in (game.enemy_party if not is_enemy else game.deployed_party) if e and e.current_hp > 0]
                     if enemy_pool:
                         target = enemy_pool[0]
+                        # 对比受击前后的总护盾，得到这次普攻实际消耗的护盾值。
+                        shield_before = sum(target.shields.values())
                         dmg = target.take_damage(actor.atk)
+                        absorbed = shield_before - sum(target.shields.values())
+                        shown_damage = dmg + absorbed
                         actor.dmg_dealt += dmg  
                         
                         t_is_enemy = target in game.enemy_party
@@ -330,14 +381,14 @@ def process_turn(game, combat_log, floating_texts):
 
                         combat_log.append([
                             (f"> {faction_label}", actor_faction_color), (actor.name, actor_color), (" 普攻 ", BLACK), 
-                            (target.name, t_color), (f" 造成 {dmg} 伤害！", BLACK)
+                            (target.name, t_color), (f" 造成 {shown_damage} 伤害！", BLACK)
                         ])
                         
                         if target.current_hp <= 0:
                             combat_log.append([("  [击杀] ", RED), (target.name, t_color), (" 阵亡了！", DARK_GRAY)])
                         
                         base_x, base_y = effect_position(t_idx, t_is_enemy)
-                        floating_texts.append(FloatingText(base_x + random.randint(-15, 15), base_y, f"-{dmg}", BLACK))
+                        floating_texts.append(FloatingText(base_x + random.randint(-15, 15), base_y, f"-{shown_damage}", BLACK))
                 
                 acted = True
 

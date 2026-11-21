@@ -589,7 +589,7 @@ def draw_effects(surface, game, action, progress):
                     pygame.draw.line(surface,tint,(tx+offset,ty-lift-7),(tx+offset,ty-lift+7),3)
             elif "immune" in kinds:
                 pygame.draw.ellipse(surface,tint,(tx-36,ty-62,72,132),2)
-            elif any("def" in effect.get("stat","") for effect in effects):
+            elif "shield" in kinds or any("def" in effect.get("stat", "") for effect in effects):# 护盾与加防共用盾纹，颜色取自角色的 presentation。
                 pygame.draw.polygon(surface,tint,((tx,ty-34),(tx+27,ty-22),(tx+21,ty+18),(tx,ty+36),(tx-21,ty+18),(tx-27,ty-22)),3)
             else:
                 for offset in (-22,0,22):
@@ -658,8 +658,10 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
                 continue
             x, y = battle_position(index, enemy)
             slot = ("enemy" if enemy else "ally", index)
-            hp, stun, immune, ready = before.get(slot, (hero.current_hp, hero.stun_turns,
-                                                       hero.immune_turns, hero.skill_ready_highlight))
+            hp, stun, immune, ready, shield = before.get(slot, (
+                hero.current_hp, hero.stun_turns, hero.immune_turns,
+                hero.skill_ready_highlight, sum(hero.shields.values()),
+            ))  # 命中前读取快照，命中后读取角色当前的总护盾。
             accent = RED if enemy else GREEN
             # 软阴影与细薄地面光环帮助人物落地。
             shadow = pygame.Surface((156, 32), pygame.SRCALPHA)
@@ -678,7 +680,7 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
             idle = battle_sprite(hero.name, "idle", index % 3, enemy)
             # 血条跟随人物位移，位置按站立身高保持稳定。
             bar_y = max(rect.top + 30, y + dy - idle.get_height() - 20)
-            plates.append((x + dx, bar_y, hp, hero.max_hp, accent, stun, immune))
+            plates.append((x + dx, bar_y, hp, hero.max_hp, accent, stun, immune, shield))
             if draw_rect.collidepoint(mouse):
                 hover = hero, hp, enemy
 
@@ -686,7 +688,7 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
         surface.blit(sprite, draw_rect)
     if not dim:
         draw_effects(surface, game, action, progress)
-    for x, y, hp, max_hp, accent, stun, immune in plates:
+    for x, y, hp, max_hp, accent, stun, immune, shield in plates:
         ratio = max(0, min(1, hp / max_hp))
         pygame.draw.polygon(surface, GOLD, ((x - 49, y), (x + 50, y),
                             (x + 45, y + 10), (x - 51, y + 10)), 1)
@@ -694,6 +696,18 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
         if ratio:
             pygame.draw.rect(surface, accent, (x - 47, y + 2, max(1, round(91 * ratio)), 6))
             pygame.draw.line(surface, WHITE, (x - 47, y + 2), (x - 47 + round(90 * ratio), y + 2))
+        if shield > 0:
+            # 白条占用血条底部三像素；满血时也能看见护盾。
+            # 以最大生命为标尺，例如 20% 最大生命的护盾占血条宽度的 20%。
+            shield_width = max(1, round(91 * min(shield / max_hp, 1.0)))
+            pygame.draw.rect(surface, WHITE, (x - 47, y + 5, shield_width, 3))
+
+            # 右上方显示准确数值，左上方仍可显示“控”或“免”。
+            label = rendered_label(f"盾 {shield}", WHITE, True)
+            badge = label.get_rect().inflate(8, 2)
+            badge.bottomright = (x + 48, y - 1)
+            pygame.draw.rect(surface, (28, 39, 52), badge, border_radius=4)
+            surface.blit(label, label.get_rect(center=badge.center))
         if stun or immune:
             # 不同状态使用不同配色，统一绘制底色、边框和文字。
             if stun:
