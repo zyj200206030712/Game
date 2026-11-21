@@ -25,7 +25,7 @@ def start_battle(game):
             continue
         name = enemy_config["name"]
         base = HERO_CONFIG[name]
-        enemy = Character(name, base["image"], base["hp"], base["atk"], base["def"],
+        enemy = Character(name, base["hp"], base["atk"], base["def"],
                           base.get("tag", "普通"), base.get("skill"), base.get("skills"))
         enemy.level, enemy.star = enemy_config.get("level", 1), enemy_config.get("star", 1)
         enemy.reset_battle_state()
@@ -39,7 +39,7 @@ def start_battle(game):
         for index, hero in enumerate(party):
             if hero:
                 for pose in ("idle", "prepare", "release", "hit"):
-                    battle_sprite(hero.name, hero.image_file, pose, index % 3, enemy_side)
+                    battle_sprite(hero.name, pose, index % 3, enemy_side)
 
 
 def snapshot_team_status(game):
@@ -154,6 +154,7 @@ def main():
 
     running = True
     while running:
+        battle_dim = 0
         dt = clock.tick(60)
         screen.blit(scene_background(game.current_scene) if game.current_scene in {"LEVEL", "HERO", "GACHA"} else backdrop(), (0, 0))
         events = pygame.event.get()
@@ -262,9 +263,14 @@ def main():
             if selected:
                 btn_enlarge.draw(screen,mouse_pos)
                 if clicked and selected in game.owned_heroes:
-                    if btn_lvl_up.is_clicked(mouse_pos) and game.gold >= 100: 
-                        game.gold -= 100
-                        selected.level += 1
+                    if btn_lvl_up.is_clicked(mouse_pos):
+                        # 余额不足时复用顶部提示条，并显示还差多少金币。
+                        if game.gold < 100:
+                            game.sys_message = f"金币不足！升级需要100金币，当前{game.gold}，还差{100 - game.gold}。"
+                            sys_msg_timer = 120
+                        else:
+                            game.gold -= 100
+                            selected.level += 1
                     elif btn_star_up.is_clicked(mouse_pos):
                         if selected.duplicates >= selected.star: 
                             selected.duplicates -= selected.star
@@ -345,6 +351,7 @@ def main():
                 playback.update(game, dt)
 
             progress = playback.progress
+            battle_dim = skill_dim_amount(playback.action, progress)
             before = playback.before if progress < IMPACT_POINT else {}
             draw_battlefield(screen, game, playback.elapsed, playback.action, progress, before, playback.texts,
                              battle_mouse)
@@ -462,9 +469,16 @@ def main():
             glass(screen,(WIDTH//2-250,54,500,36))
             label(screen,game.sys_message,WIDTH//2,72,GILT,center=True)
             sys_msg_timer -= 1
-        if viewer.kind:
-            viewer.draw(screen, mouse_pos)
-        btn_quit.draw(screen, mouse_pos)
+        if battle_dim and not viewer.kind:
+            # 战场内部已分层合成；外围的导航、战报和按钮在此同步变暗。
+            _, arena_rect = arena_background()
+            btn_quit.draw(screen, mouse_pos)
+            dim_region(screen, (0, 0, WIDTH, arena_rect.top), battle_dim)
+            dim_region(screen, (0, arena_rect.bottom, WIDTH, HEIGHT - arena_rect.bottom), battle_dim)
+        else:
+            if viewer.kind:
+                viewer.draw(screen, mouse_pos)
+            btn_quit.draw(screen, mouse_pos)
         window.present()
 
     pygame.quit()

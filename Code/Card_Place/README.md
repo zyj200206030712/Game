@@ -1,3 +1,6 @@
+角色：现有类型遍历（），同归于尽，百分比伤害
+
+
 # Card Place（卡牌放置）——项目说明与内容扩展指南
 
 ## 一、项目是什么
@@ -34,8 +37,7 @@ Game/
 │       ├── ui.py            # UI 绘制、人物动作和技能特效
 │       ├── save_data.json   # 金币、关卡、角色和阵位存档
 │       └── README.md        # 项目开发说明
-├── art/                     # 新版及归档美术资源
-└── picture/                 # 原始角色图片及兼容回退图片
+└── art/                     # 放置模式的角色、战场和界面美术
 ```
 
 五个模块的调用关系：
@@ -66,11 +68,14 @@ Game/
 
 `config.py` 中的 `HERO_CONFIG` 目前有 38 名角色。每个角色的 hp、atk、def 是生命、攻击、防御。
 
+hp:100~1000, atk:10~100, def:10~100；角色可使用单个 skill 或 skills 列表；skills 中每个技能可配置 priority，优先级越高越先释放；damage类multiplier按施法者攻击结算；heal/buff/debuff按施法者与目标各50%的对应属性混合结算；lifesteal按刚造成的实际伤害 * multiplier 回血；resurrect按施法者与目标各50%最大生命值混合后 * multiplier 复活，并重置目标战斗态，cd
+
+角色平均属性为 {"hp": 500, "atk": 50, "def": 50}，女性角色平均属性为 {"hp": 400, "atk": 40, "def": 40}，可作为设计新角色的参考。
 
 
 ### 2. 实际属性成长：`models.py` / Character.scale_stat()
 
-- `level` 和 `star` 决定最终属性,每升一级，属性在上一级基础上乘以 1.1 并四舍六入五成双取整；每升一星，属性直接翻倍。男性角色平均属性为 {"hp": 500, "atk": 50, "def": 50}，女性角色平均属性为 {"hp": 400, "atk": 40, "def": 40}，可作为设计新角色的参考。
+- `level` 和 `star` 决定最终属性,每升一级，属性在上一级基础上乘以 1.1 并四舍六入五成双取整；每升一星，属性直接翻倍。
 
 计算顺序：先计算等级成长（每一级都 round 取整），再计算星级倍率。
 
@@ -114,7 +119,7 @@ Character.defense：等级星级防御 + 战斗临时防御增减益；最低为
 ### 4. 新增角色具体步骤
 
 
-**第一步：将原始角色图片放入项目根目录 picture/（或准备新美术资源）。**
+**第一步：将立绘和 2×2 动作图分别放入 `art/cinematic/portraits/` 和 `art/cinematic/poses/`，两张图都用角色名称命名（如 `示例剑士.png`）。**
 
 
 **第二步：在 `config.py` 的 `HERO_CONFIG` 中增加角色，角色名称必须唯一：**
@@ -122,7 +127,6 @@ Character.defense：等级星级防御 + 战斗临时防御增减益；最低为
 
 ```python
 "示例剑士": {
-    "image": "picture/示例剑士.png",  # 角色原图的相对路径
     "hp": 500,                     # 1级1星基础生命
     "atk": 60,                     # 1级1星基础攻击
     "def": 50,                     # 1级1星基础防御
@@ -147,24 +151,11 @@ Character.defense：等级星级防御 + 战斗临时防御增减益；最低为
 "示例剑士": {
     "style": "melee",              # 近战 melee；远程 ranged
     "projectile": "bolt",          # 远程投射物类型，近战也须保留字段
-    "facing": (1, 1, 1, 1)         # idle/prepare/release/hit 的原图朝向
 },
 ```
 
 
-**第四步：如接入 2×2 角色图集，在 `ui.py` 的 `SPRITE_NAMES` 注册唯一资源 ID：**
-
-
-```python
-"示例剑士": "hero_38",              # 示例：现有 ID 已用到 hero_37
-```
-
-再准备 art/cinematic/poses/hero_38.png 等素材（第七节详述）。
-如暂时只有 picture/ 的原图，可以先不添加 `SPRITE_NAMES` 映射，
-但仍必须添加 `COMBAT_PRESENTATION`，否则战斗显示读取配置会报错。
-
-
-**第五步：用图鉴、召唤、测试战斗检查属性、动作、技能命中与显示效果。**
+**第四步：用图鉴、召唤、测试战斗检查属性、动作、技能命中与显示效果。**
 
 召唤池由 list(`HERO_CONFIG`.keys()) 自动生成，无须另行登记。
 旧存档不会自动拥有新增角色，需要召唤获取或在测试模式使用。
@@ -396,33 +387,18 @@ base_def；而 selected.max_hp / atk / defense 显示的是当前属性。
 注意：以下路径从项目根目录 Game/ 起算，不是以 Code/Card_Place/ 为根目录。
 
 
-**1. picture/角色图片.png**
-- `config.py` 的 `HERO_CONFIG`[角色名]["image"] 中配置的原始角色图片。
-- 若对应的新版动作图/归档图不存在，头像和战场可能回退到这些图片。
+**1. art/cinematic/portraits/角色名.png**
+- 关卡阵容、图鉴、放大查看、召唤和测试布阵共用这张立绘。
 
+**2. art/cinematic/poses/角色名.png**
+- 战斗使用同名的 2×2 图集。左上为待机，右上为准备，左下为释放，右下为受击。
+- 立绘或动作图缺失时，加载器生成占位图。
 
-**2. art/cinematic/poses/hero_00.png ～ hero_37.png**
-- 38 名现有角色的新动作 2×2 图集，与 `ui.py`/SPRITE_NAMES 一一对应。
-- 四格位置固定：左上 idle，右上 prepare，左下 release，右下 hit。
-- 一张图可提供该角色的四种基础姿势；并非“普攻一套、技能一套”。
-- 图片需考虑透明背景、各姿势的大小、角色朝向和一致性。
-
-
-**3. art/archive/faithful/hero_00.png ～ hero_37.png**
-- 新动作图缺失时的归档四姿势图集回退来源。
-- 新旧素材按角色资源 ID 查找；不建议随意重命名。
-
-
-**4. art/cinematic/portraits/hero_00.png ～ hero_37.png**
-- 独立高清立绘，主要用于大图查看、卡牌/角色展示。
-- 缺失时会尝试从对应动作图集中提取待机姿势。
-
-
-**5. art/illustrated/arena.png**
+**3. art/illustrated/arena.png**
 - 战场背景；在 `ui.py`/arena_background() 中加载。
 
 
-**6. art/cinematic/ui/home.png**
+**4. art/cinematic/ui/home.png**
 - 关卡界面背景。
 art/cinematic/ui/hero.png
 - 角色图鉴背景。
@@ -436,20 +412,17 @@ art/cinematic/ui/icons.png
 
 **资源映射与使用函数：**
 
-`ui.py`/SPRITE_NAMES          中文角色名 → hero_XX 资源 ID。
 `ui.py`/load_image()          根据路径读取图片并缓存。
 `ui.py`/load_portrait()       加载角色缩略立绘。
-`ui.py`/display_art()         优先高清 portrait，缺失则使用动作图/原图。
+`ui.py`/display_art()         按角色名加载高清立绘。
 `ui.py`/atlas_frame()         从动作 2×2 图集中裁切单个姿势。
 `ui.py`/battle_sprite()       缩放、翻转并返回战场角色姿势。
 `config.py`/COMBAT_PRESENTATION
 style="melee" / "ranged" 决定对敌行动采用近战位移还是远程演出；
 projectile 可用 bolt、blade、arrow、wave、fire；
-facing 为四种姿势的原始左右朝向。
-`ui.py`/CINEMATIC_FACING      对已接入的新图集进行额外朝向校准。
+动作图中的角色统一朝右，战斗时敌方水平翻转。
 
 新增角色图片建议：
-先确保 picture/ 原图可加载；如需完整人物动作，分配唯一 hero_XX；
 添加 poses 和 portraits 后检查四格位置、透明度、出招方向及受击帧。
 新增 UI 美术图不应只加入文件夹，还需要在 `ui.py` 相应绘制函数中加载。
 

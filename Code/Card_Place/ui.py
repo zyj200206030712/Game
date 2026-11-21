@@ -9,58 +9,8 @@ import math
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ART_DIR = PROJECT_ROOT / "art"  # 与 Free 共用项目根目录下的美术资源。
 ILLUSTRATED_DIR = ART_DIR / "illustrated"
-CHARACTER_DIR = ART_DIR / "archive" / "faithful"  # 新版动作图缺失时使用归档图集。
-# 新动作逐个接入，旧素材只作缺失时的兼容回退。
+# 角色名称直接对应立绘与四帧动作图集的文件名。
 CINEMATIC_POSES = ART_DIR / "cinematic" / "poses"
-CINEMATIC_FACING = {
-    # 逐姿势校准新图：鲸形前两帧及金甲骑士待机的原始朝向为左。
-    "hero_20": (-1, -1, 1, 1),
-    "hero_21": (-1, 1, 1, 1),
-    "hero_25": (-1, 1, 1, 1),
-}
-
-# 全部 38 个角色逐一绑定原图重绘图集，避免按名称猜测形象。
-SPRITE_NAMES = {
-    "安迷修": "hero_00",
-    "暗魂": "hero_01",
-    "净世圣女": "hero_02",
-    "白骨夫人": "hero_03",
-    "冰云剑仙": "hero_04",
-    "魅狐妖姬": "hero_05",
-    "帝皇": "hero_06",
-    "五灵龙神": "hero_07",
-    "毒孤博": "hero_08",
-    "小花仙": "hero_09",
-    "光明神王": "hero_10",
-    "艾莎": "hero_11",
-    "黑迪": "hero_12",
-    "黑骑女将": "hero_13",
-    "极光神使": "hero_14",
-    "精灵公主": "hero_15",
-    "巨甲象": "hero_16",
-    "巨爪熊": "hero_17",
-    "库忿斯": "hero_18",
-    "傀儡女王": "hero_19",
-    "七彩鲲鹏": "hero_20",
-    "金甲骑士": "hero_21",
-    "美杜莎": "hero_22",
-    "紫萱": "hero_23",
-    "女武神": "hero_24",
-    "殿主": "hero_25",
-    "无相菩萨": "hero_26",
-    "乔奢费": "hero_27",
-    "人鱼公主": "hero_28",
-    "若溪": "hero_29",
-    "兽神王": "hero_30",
-    "净水使": "hero_31",
-    "剑光仙": "hero_32",
-    "刑天": "hero_33",
-    "炎龙": "hero_34",
-    "烈火战龙": "hero_35",
-    "萧炎": "hero_36",
-    "尊皇圣帝": "hero_37",
-}
-POSE_SPRITES = set(SPRITE_NAMES.values())
 BATTLE_LOG_RECT = pygame.Rect(18, 741, WIDTH - 36, 48)
 IMPACT_POINT = 0.52
 LAUNCH_POINT = 0.22
@@ -345,7 +295,7 @@ def arena_background():
 def atlas_frame(key, pose="idle"):
     # 四个关键姿势使用原始高清图集，在加载时分格并按透明边缘确定轮廓。
     path = CINEMATIC_POSES / f"{key}.png"
-    atlas = load_image(path if path.exists() else CHARACTER_DIR / f"{key}.png", None)
+    atlas = load_image(path, None)
     column, row = {"idle": (0, 0), "prepare": (1, 0),
                    "release": (0, 1), "hit": (1, 1)}[pose]
     width, height = atlas.get_width() // 2, atlas.get_height() // 2
@@ -363,27 +313,16 @@ def atlas_frame(key, pose="idle"):
     return frame.subsurface(bounds).copy() if bounds else frame
 
 
-def display_art(name, image_file):
+def display_art(name):
     # 展示立绘独立于动作图集，放大查看不再使用四宫格中的小图。
-    key = SPRITE_NAMES.get(name)
-    path = ART_DIR / "cinematic" / "portraits" / f"{key}.png"
-    if path.exists(): return load_image(path, None)
-    return atlas_frame(key) if key else load_image(image_file, None)
-
-
-def load_portrait(name, filepath, size=(180, 240)):
-    key = SPRITE_NAMES.get(name)
-    if not key or not ((CINEMATIC_POSES / f"{key}.png").exists() or (CHARACTER_DIR / f"{key}.png").exists()):
-        return load_image(filepath, size)
-    return framed_portrait(key, size)
+    return load_image(ART_DIR / "cinematic" / "portraits" / f"{name}.png", None)
 
 
 @lru_cache(maxsize=64)
-def framed_portrait(key, size):
+def load_portrait(name, size):
     portrait = pygame.Surface(size, pygame.SRCALPHA)
     portrait.fill((18, 33, 58))
-    name = next(name for name, value in SPRITE_NAMES.items() if value == key)
-    sprite = fit_image(display_art(name, HERO_CONFIG[name]["image"]), size[0] - 8, size[1] - 4)
+    sprite = fit_image(display_art(name), size[0] - 8, size[1] - 4)
     portrait.blit(sprite, sprite.get_rect(midbottom=(size[0] // 2, size[1])))
     return portrait
 
@@ -395,59 +334,24 @@ def fit_image(image, width, height):
     return pygame.transform.smoothscale(image, size)
 
 
-def fallback_sprite(image_file, name):
-    # 有透明立绘的旧角色沿用自己的剪影，带背景的卡图用带头像的剪影站场。
-    image = load_image(image_file, (110, 145))
-    bounds = image.get_bounding_rect(min_alpha=48)
-    corners = ((0, 0), (109, 0), (0, 144), (109, 144))
-    if bounds and (bounds.width < 106 or bounds.height < 140
-                   or sum(image.get_at(point).a < 48 for point in corners) >= 3):
-        return image.subsurface(bounds)
-
-    tint = (75, 100, 118) if sum(map(ord, name)) % 2 else (100, 76, 117)
-    sprite = pygame.Surface((104, 145), pygame.SRCALPHA)
-    outline = ((51, 26), (74, 48), (94, 92), (75, 130), (89, 144),
-               (60, 144), (51, 114), (42, 144), (13, 144), (27, 124),
-               (10, 91), (26, 48))
-    pygame.draw.polygon(sprite, tint, outline)
-    pygame.draw.polygon(sprite, GOLD, outline, 2)
-    medallion = pygame.Surface((55, 55), pygame.SRCALPHA)
-    pygame.draw.circle(medallion, (255, 255, 255, 255), (27, 27), 25)
-    face = image.subsurface(pygame.Rect(20, 12, 70, 70))
-    medallion.blit(pygame.transform.smoothscale(face, (55, 55)), (0, 0),
-                   special_flags=pygame.BLEND_RGBA_MULT)
-    sprite.blit(medallion, (24, 10))
-    pygame.draw.circle(sprite, GOLD, (51, 37), 25, 2)
-    return sprite
-
-
 @lru_cache(maxsize=256)
-def battle_sprite(name, image_file, pose, depth, is_enemy):
-    key = SPRITE_NAMES.get(name)
-    if key and ((CINEMATIC_POSES / f"{key}.png").exists() or (CHARACTER_DIR / f"{key}.png").exists()):
-        image = atlas_frame(key, pose)
-        # 以待机身体高度确定同一角色的比例，出招弯腰时不会被错误拉高。
-        idle = atlas_frame(key)
-        height = 189 + depth * 14
-        factor = min(height / idle.get_height(), 238 / idle.get_width())
-        sprite = pygame.transform.smoothscale(image, (
-            max(1, round(image.get_width() * factor)),
-            max(1, round(image.get_height() * factor))))
-    else:
-        sprite = fit_image(fallback_sprite(image_file, name), 215, 189 + depth * 14)
-    # 先校准该姿势的素材朝向，再按阵营镜像；不改原图或卡面。
-    index = ("idle", "prepare", "release", "hit").index(pose)
-    source_direction = COMBAT_PRESENTATION[name]["facing"][index]
-    if (CINEMATIC_POSES / f"{key}.png").exists():
-        source_direction = CINEMATIC_FACING.get(key, (1, 1, 1, 1))[index]
-    flip = source_direction != (-1 if is_enemy else 1)
-    return pygame.transform.flip(sprite, True, False) if flip else sprite
+def battle_sprite(name, pose, depth, is_enemy):
+    image = atlas_frame(name, pose)
+    # 以待机身体高度确定同一角色的比例，出招弯腰时不会被错误拉高。
+    idle = atlas_frame(name)
+    height = 189 + depth * 14
+    factor = min(height / idle.get_height(), 238 / idle.get_width())
+    sprite = pygame.transform.smoothscale(image, (
+        max(1, round(image.get_width() * factor)),
+        max(1, round(image.get_height() * factor))))
+    # 动作原图统一朝右，敌方在绘制时水平翻转。
+    return pygame.transform.flip(sprite, True, False) if is_enemy else sprite
 
 
 def action_style(hero, action):
     # 控制和减益同样是对敌行动，不用“是否造成伤害”判断攻击距离。
     hostile = action and any(t[0] != action.actor[0] for t in action.targets)
-    return COMBAT_PRESENTATION[hero.name]["style"] if hostile else "support"
+    return HERO_CONFIG[hero.name]["presentation"]["style"] if hostile else "support"
 
 
 def actor_offset(hero, slot, enemy, action, progress):
@@ -490,15 +394,15 @@ def sprite_pose(hero, slot, depth, enemy, elapsed, action, progress, hp):
                 previous, blend = "idle", progress / 0.06
         elif progress < 0.8:
             # 新辅助动作专为治疗、增益和复活绘制，原地也展示释放帧。
-            pose = "release" if (CINEMATIC_POSES / f"{SPRITE_NAMES.get(hero.name)}.png").exists() else ("prepare" if action_style(hero, action) == "support" else "release")
+            pose = "release"
             if progress < release + 0.05:
                 previous, blend = "prepare", (progress - release) / 0.05
         elif progress < 0.9:
-            previous = "release" if (CINEMATIC_POSES / f"{SPRITE_NAMES.get(hero.name)}.png").exists() else ("prepare" if action_style(hero, action) == "support" else "release")
+            previous = "release"
             blend = (progress - 0.8) / 0.1
-    sprite = battle_sprite(hero.name, hero.image_file, pose, depth, enemy)
+    sprite = battle_sprite(hero.name, pose, depth, enemy)
     if previous:
-        sprite = blend_pose(battle_sprite(hero.name, hero.image_file, previous, depth, enemy), sprite, blend)
+        sprite = blend_pose(battle_sprite(hero.name, previous, depth, enemy), sprite, blend)
     if hp <= 0 and not hit:
         sprite = pygame.transform.rotozoom(sprite, -direction * 64, 0.8)
         sprite.set_alpha(80)
@@ -543,30 +447,99 @@ def add_light(surface, position, color, radius):
     surface.blit(light, light.get_rect(center=position), special_flags=pygame.BLEND_RGB_ADD)
 
 
+def draw_projectile(surface, point, unit, kind, color, travel):
+    # 局部坐标沿飞行方向旋转，敌我双方及斜向弹道共用同一套造型。
+    normal = pygame.Vector2(-unit.y, unit.x)
+    if kind == "ice":
+        tip, rear = point + unit * 19, point - unit * 17
+        pygame.draw.polygon(surface, color, [tip, point + normal * 8, rear, point - normal * 8])
+        pygame.draw.aaline(surface, WHITE, rear, tip)
+        return
+    if kind == "poison":
+        for index, size in enumerate((10, 7, 5, 3)):
+            sway = math.sin(travel * 12 + index * 2) * index * 3
+            bubble = point - unit * index * 10 + normal * sway
+            pygame.draw.circle(surface, color, bubble, size)
+            pygame.draw.circle(surface, WHITE, bubble - normal * size * .4, 2)
+        return
+    if kind == "shadow":
+        for index, size in enumerate((12, 8, 5)):
+            echo = point - unit * index * 16 + normal * math.sin(travel * 9 + index) * index * 3
+            pygame.draw.circle(surface, (35, 23, 52), echo, size)
+            pygame.draw.circle(surface, color, echo, size, 2)
+        return
+    if kind == "blade":
+        # 两条相接的弧线形成月牙，凸面始终朝向飞行方向。
+        outer, inner = [], []
+        for step in range(-12, 13):
+            t = step / 12
+            bend = 1 - t * t
+            offset = point + normal * (29 * t)
+            outer.append(offset + unit * (26 * bend - 13))
+            inner.append(offset + unit * (15 * bend - 13))
+        pygame.draw.polygon(surface, color, outer + inner[::-1])
+        # 刃缘稍微提亮，保留角色自身的金色或冰蓝色。
+        edge = tuple(round(channel + (255 - channel) * .38) for channel in color)
+        pygame.draw.aalines(surface, edge, False, outer)
+        return
+    tail = point - unit * (38 if kind == "arrow" else 24)
+    pygame.draw.line(surface, color, tail, point, 3)
+    if kind == "arrow":
+        pygame.draw.polygon(surface, WHITE, [point + unit * 9, point - unit * 9 + normal * 5, point - unit * 9 - normal * 5])
+    elif kind == "wave":
+        pygame.draw.circle(surface, color, point, 12, 2)
+        pygame.draw.circle(surface, WHITE, point, 6, 1)
+    else:
+        add_light(surface, point, color, 24 if kind == "fire" else 16)
+        pygame.draw.circle(surface, WHITE, point, 4)
+
+
+def draw_attack_impact(surface, center, kind, color, burst, facing):
+    # 穿刺和爪痕随攻方镜像；碎冰、毒雾向外扩散，暗影向中心收缩。
+    radius = 18 + round(burst * 55)
+    width = max(1, round(5 * (1 - burst)))
+    if kind == "slash":
+        rect = pygame.Rect(0, 0, radius * 2, radius * 2)
+        rect.center = center
+        start = -.8 if facing == 1 else math.pi - 2.2
+        pygame.draw.arc(surface, color, rect, start, start + 3, width)
+    elif kind in {"thrust", "claw"}:
+        direction = pygame.Vector2(facing, -.35 if kind == "thrust" else .85).normalize()
+        normal = pygame.Vector2(-direction.y, direction.x)
+        for offset in ((-11, 0, 11) if kind == "claw" else (0,)):
+            middle = center + normal * offset
+            pygame.draw.polygon(surface, color, [middle - direction * radius,
+                                middle + normal * width, middle + direction * radius, middle - normal * width])
+    elif kind == "collapse":
+        pygame.draw.circle(surface, color, center, max(2, round(52 * (1 - burst))), 2)
+        pygame.draw.circle(surface, (39, 22, 54), center, 3 + round(8 * burst))
+    else:
+        if kind == "spark":
+            pygame.draw.circle(surface, color, center, radius, 2)
+        for index in range(8):
+            ray = pygame.Vector2(1, 0).rotate(index * 45)
+            tip = center + ray * radius
+            base = center + ray * radius * .65
+            if kind == "shatter":
+                side = pygame.Vector2(-ray.y, ray.x) * width
+                pygame.draw.polygon(surface, color, [tip, base + side, base - ray * 5, base - side])
+            elif kind == "mist":
+                cloud = center + ray * radius * (.65 + .18 * (index % 2))
+                pygame.draw.circle(surface, color, cloud, 5 + round(burst * 8), width)
+            else:
+                pygame.draw.line(surface, color, base, tip, 2)
+
+
 def draw_effects(surface, game, action, progress):
     if not action or action.controlled or not action.targets or progress > 0.86:
         return
     enemy = action.actor[0] == "enemy"
     party = game.enemy_party if enemy else game.deployed_party
     hero = party[action.actor[1]]
-    key = SPRITE_NAMES.get(hero.name)
-    # 特效沿用每位角色原图的元素色，不改变技能伤害和目标判定。
-    color = {
-        "hero_00": PURPLE, "hero_01": RED, "hero_02": (248, 157, 205),
-        "hero_03": (210, 220, 250), "hero_04": (117, 215, 255),
-        "hero_05": (244, 146, 210), "hero_06": GOLD, "hero_07": GOLD,
-        "hero_08": GREEN, "hero_09": (246, 174, 224), "hero_10": GOLD,
-        "hero_11": (127, 219, 255), "hero_12": (101, 227, 244),
-        "hero_13": RED, "hero_14": (133, 230, 252), "hero_15": GREEN,
-        "hero_16": (194, 201, 215), "hero_17": RED, "hero_18": GREEN,
-        "hero_19": (224, 230, 255), "hero_20": (154, 197, 255),
-        "hero_21": GOLD, "hero_22": (255, 132, 72), "hero_23": PURPLE,
-        "hero_24": PURPLE, "hero_25": PURPLE, "hero_26": GOLD,
-        "hero_27": PURPLE, "hero_28": (107, 212, 247), "hero_29": BLUE,
-        "hero_30": RED, "hero_31": BLUE, "hero_32": GOLD,
-        "hero_33": RED, "hero_34": (255, 132, 54), "hero_35": (255, 132, 54),
-        "hero_36": (255, 115, 63), "hero_37": GOLD,
-    }.get(key, PURPLE)
+    # 颜色、弹道与命中形状均从当前角色的配置读取。
+    presentation = HERO_CONFIG[hero.name]["presentation"]
+    color = presentation["color"]
+    projectile = presentation.get("projectile", "bolt")
     x, feet = battle_position(action.actor[1], enemy)
     y = feet - 110
     style = action_style(hero, action)
@@ -576,9 +549,9 @@ def draw_effects(surface, game, action, progress):
     kinds = {effect.get("type") for effect in effects}
     # 近战特效起点跟随身体；远程的箭矢和法术在命中前抵达目标。
     dx, dy = actor_offset(hero, action.actor, enemy, action, progress)
-    idle = battle_sprite(hero.name, hero.image_file, "idle", action.actor[1] % 3, enemy)
+    idle = battle_sprite(hero.name, "idle", action.actor[1] % 3, enemy)
     # 发射点贴近弓或施法手的高度，镜像后偏移方向也一起反转。
-    hand_height = .82 if COMBAT_PRESENTATION[hero.name]["projectile"] == "arrow" else .65
+    hand_height = .82 if projectile == "arrow" else .65
     hand_x = (-1 if enemy else 1) * min(58, idle.get_width() * .3)
     origin = pygame.Vector2(x + dx + hand_x, feet + dy - idle.get_height() * hand_height)
     if progress < IMPACT_POINT:
@@ -592,18 +565,7 @@ def draw_effects(surface, game, action, progress):
                 point = origin.lerp(end, travel)
                 vector = end - origin
                 unit = vector.normalize() if vector.length_squared() else pygame.Vector2(1, 0)
-                normal = pygame.Vector2(-unit.y, unit.x)
-                kind = COMBAT_PRESENTATION[hero.name]["projectile"]
-                tail = point - unit * (38 if kind == "arrow" else 24)
-                pygame.draw.line(surface, color, tail, point, 3)
-                if kind in {"arrow", "blade"}:
-                    pygame.draw.polygon(surface, WHITE, [point + unit * 9, point - unit * 9 + normal * 5, point - unit * 9 - normal * 5])
-                elif kind == "wave":
-                    pygame.draw.circle(surface, color, point, 12, 2)
-                    pygame.draw.circle(surface, WHITE, point, 6, 1)
-                else:
-                    add_light(surface, point, color, 24 if kind == "fire" else 16)
-                    pygame.draw.circle(surface, WHITE, point, 4)
+                draw_projectile(surface, point, unit, projectile, color, travel)
         return
     burst = min(1, (progress - IMPACT_POINT) / (0.86 - IMPACT_POINT))
     for target in action.targets:
@@ -612,12 +574,8 @@ def draw_effects(surface, game, action, progress):
         tint = GREEN if target[0] == action.actor[0] and "heal" in kinds else color
         radius = 18 + round(burst * 55)
         add_light(surface, (tx, ty), tint, max(8, round(60 * (1 - burst))))
-        if style == "melee":
-            arc = pygame.Rect(tx - radius, ty - radius, radius * 2, radius * 2)
-            pygame.draw.arc(surface, tint, arc, -.8, 2.2, max(1, round(6 * (1 - burst))))
-        else:
-            pygame.draw.circle(surface, tint, (tx, ty), radius, 2)
         if style == "support":
+            pygame.draw.circle(surface, tint, (tx, ty), radius, 2)
             # 治疗、护盾和增益直接在友方身上显现，不朝友军挥刀或冲锋。
             pygame.draw.ellipse(surface, tint, (tx - radius, ty + 90, radius * 2, radius // 2), 2)
             if "resurrect" in kinds:
@@ -637,11 +595,9 @@ def draw_effects(surface, game, action, progress):
                 for offset in (-22,0,22):
                     pygame.draw.lines(surface,tint,False,((tx+offset-8,ty+8),(tx+offset,ty-8),(tx+offset+8,ty+8)),2)
         else:
-            for index in range(8):
-                angle = index * math.tau / 8
-                start = (tx + math.cos(angle) * radius * .65, ty + math.sin(angle) * radius * .65)
-                end = (tx + math.cos(angle) * radius, ty + math.sin(angle) * radius)
-                pygame.draw.line(surface, tint, start, end, 2)
+            draw_attack_impact(surface, pygame.Vector2(tx, ty), presentation["impact"],
+                               tint, burst, -1 if enemy else 1)
+
 
 
 def skill_banner_rect(action):
@@ -657,12 +613,44 @@ def skill_description_lines(description):
     return wrap_text_lines(description, 404)
 
 
+@lru_cache(maxsize=16)
+def ready_ring(phase):
+    # 缓存十六级呼吸亮度，厚金边和四个刻度在明暗地面上都能辨认。
+    ring = pygame.Surface((150, 36), pygame.SRCALPHA)
+    strength = phase / 15
+    for inset, color, width in (
+        (0, (255, 170, 38, 45 + round(45 * strength)), 5),
+        (5, (85, 42, 16, 230), 5),
+        (6, (255, 194 + round(36 * strength), 67, 255), 3),
+        (12, (255, 243, 172, 220), 2),
+    ):
+        pygame.draw.ellipse(ring, color, (inset, inset // 3, 150 - 2 * inset, 36 - 2 * (inset // 3)), width)
+    for x, y in ((5, 18), (145, 18), (75, 4), (75, 32)):
+        pygame.draw.polygon(ring, (255, 251, 207), ((x-4, y), (x, y-3), (x+4, y), (x, y+3)))
+    return ring
+
+
+def skill_dim_amount(action, progress):
+    # 只在实际释放技能时淡入暗幕，命中后逐渐恢复亮度。
+    if not action or not action.skill or action.controlled:
+        return 0
+    return round(154 * max(0, min(1, progress / .12, (1 - progress) / .16)))
+
+
+def dim_region(surface, rect, amount):
+    # 直接乘以亮度系数，避免在每个动画帧创建全屏半透明图层。
+    level = 255 - amount
+    surface.fill((level, level, level), rect, special_flags=pygame.BLEND_RGB_MULT)
+
+
 def draw_battlefield(surface, game, elapsed, action, progress, before, floating_texts, mouse):
     arena, rect = arena_background()
     surface.blit(arena, rect)
     previous_clip = surface.get_clip()
     surface.set_clip(rect)
     figures, plates = [], []
+    dim = skill_dim_amount(action, progress)
+    caster = None
     hover = None
     for enemy, party in ((False, game.deployed_party), (True, game.enemy_party)):
         for index, hero in enumerate(party):
@@ -678,11 +666,16 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
             pygame.draw.ellipse(shadow, (6, 8, 22, 100), shadow.get_rect())
             surface.blit(shadow, (x - 78, y - 14))
             if ready and hp > 0:
-                pygame.draw.ellipse(surface, (162, 137, 88), (x - 55, y - 8, 110, 15), 1)
+                phase = round(7.5 * (1 + math.sin(elapsed * .006)))
+                ring = ready_ring(phase)
+                surface.blit(ring, ring.get_rect(center=(x, y)))
             sprite, dx, dy = sprite_pose(hero, slot, index % 3, enemy, elapsed, action, progress, hp)
             draw_rect = sprite.get_rect(midbottom=(x + dx, y + dy))
-            figures.append((y + dy, sprite, draw_rect))
-            idle = battle_sprite(hero.name, hero.image_file, "idle", index % 3, enemy)
+            if dim and slot == action.actor:
+                caster = sprite, draw_rect
+            else:
+                figures.append((y + dy, sprite, draw_rect))
+            idle = battle_sprite(hero.name, "idle", index % 3, enemy)
             # 血条跟随人物位移，位置按站立身高保持稳定。
             bar_y = max(rect.top + 30, y + dy - idle.get_height() - 20)
             plates.append((x + dx, bar_y, hp, hero.max_hp, accent, stun, immune))
@@ -691,7 +684,8 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
 
     for _, sprite, draw_rect in sorted(figures, key=lambda item: item[0]):
         surface.blit(sprite, draw_rect)
-    draw_effects(surface, game, action, progress)
+    if not dim:
+        draw_effects(surface, game, action, progress)
     for x, y, hp, max_hp, accent, stun, immune in plates:
         ratio = max(0, min(1, hp / max_hp))
         pygame.draw.polygon(surface, GOLD, ((x - 49, y), (x + 50, y),
@@ -701,12 +695,29 @@ def draw_battlefield(surface, game, elapsed, action, progress, before, floating_
             pygame.draw.rect(surface, accent, (x - 47, y + 2, max(1, round(91 * ratio)), 6))
             pygame.draw.line(surface, WHITE, (x - 47, y + 2), (x - 47 + round(90 * ratio), y + 2))
         if stun or immune:
-            label = rendered_label("控" if stun else "免", PURPLE if stun else GOLD, True)
-            surface.blit(label, (x - 48, y - 19))
+            # 不同状态使用不同配色，统一绘制底色、边框和文字。
+            if stun:
+                text, background, border = "控", (58, 25, 83), (223, 181, 255)
+            else:
+                text, background, border = "免", (77, 52, 12), (255, 214, 112)
+
+            label = rendered_label(text, WHITE, True)
+            badge = label.get_rect().inflate(8, 2)
+            badge.bottomleft = (x - 50, y - 1)
+
+            pygame.draw.rect(surface, background, badge, border_radius=4)
+            pygame.draw.rect(surface, border, badge, 1, border_radius=4)
+            surface.blit(label, label.get_rect(center=badge.center))
 
     if progress >= IMPACT_POINT:
         for text in floating_texts:
             text.draw(surface, (progress - IMPACT_POINT) / (1 - IMPACT_POINT))
+    if dim:
+        # 其他角色、血条和飘字先暗化，再按原亮度绘制施法者和技能特效。
+        dim_region(surface, rect, dim)
+        if caster:
+            surface.blit(*caster)
+        draw_effects(surface, game, action, progress)
     surface.set_clip(previous_clip)
     banner = skill_banner_rect(action)
     if banner:
@@ -770,8 +781,7 @@ class DetailViewer:
 
     def open_hero(self, hero):
         self.kind, self.title = "hero", hero.name + " · 高清立绘"
-        key = SPRITE_NAMES.get(hero.name)
-        self.source = display_art(hero.name, hero.image_file)
+        self.source = display_art(hero.name)
         self.zoom, self.pan, self.dragging = 1.0, pygame.Vector2(), False
         self.scaled = None
 
@@ -954,8 +964,8 @@ def draw_header(screen, game):
 
 # 常用展示尺寸只缩放一次，场景绘制直接复用高清立绘的缩放结果。
 @lru_cache(maxsize=64)
-def figure_art(name, image_file, width, height):
-    return fit_image(display_art(name, image_file), width, height)
+def figure_art(name, width, height):
+    return fit_image(display_art(name), width, height)
 
 
 def small(screen, text, x, y, color=MUTED):
@@ -984,14 +994,13 @@ def draw_home(screen, game):
                 data = HERO_CONFIG[name]
                 level, star = config.get("level", 1), config.get("star", 1)
                 hp, attack, defense = (Character.scale_stat(data[k], level, star) for k in ("hp", "atk", "def"))
-                filename = data["image"]
             elif hero:
-                name, filename, level, star = hero.name, hero.image_file, hero.level, hero.star
+                name, level, star = hero.name, hero.level, hero.star
                 hp, attack, defense = hero.max_hp, hero.atk, hero.defense
             else:
                 label(screen, f"{slot + 1} 号位  ·  空位", *rect.center, MUTED, center=True)
                 continue
-            screen.blit(load_portrait(name, filename, (76, 96)), (rect.x + 8, rect.y + 8))
+            screen.blit(load_portrait(name, (76, 96)), (rect.x + 8, rect.y + 8))
             x, y = rect.x + 94, rect.y + 10
             label(screen, name, x, y, GILT)
             small(screen, f"{slot + 1}号位   Lv.{level}   ★{star}", x, y + 31)
@@ -1025,8 +1034,7 @@ def draw_hero_page(screen, game, mouse_pos, clicked, buttons):
                 hero = owned.get(name)
                 caption = f"Lv.{hero.level}  ★{hero.star}" if hero else "未获得"
             if name:
-                filename = hero.image_file if hero else HERO_CONFIG[name]["image"]
-                screen.blit(load_portrait(name, filename, (49, 66)), (rect.x+6, rect.y+7))
+                screen.blit(load_portrait(name, (49, 66)), (rect.x+6, rect.y+7))
                 if clicked and rect.collidepoint(mouse_pos):
                     game.selected_name = name
                 small(screen, name, rect.x+60, rect.y+17, INK)
@@ -1037,7 +1045,7 @@ def draw_hero_page(screen, game, mouse_pos, clicked, buttons):
                 small(screen, caption, rect.x+16, rect.y+15)
                 small(screen, "空位", rect.x+16, rect.y+42)
     selected = game.get_active_hero()
-    figure = figure_art(selected.name, selected.image_file, 520, 535)
+    figure = figure_art(selected.name, 520, 535)
     screen.blit(figure, figure.get_rect(midbottom=(608,665)))
     glass(screen,(872,100,386,565))
     label(screen,selected.name,890,119,GILT,True)
@@ -1092,7 +1100,7 @@ def draw_summon(screen, items, timer, index, mouse_pos, clicked):
                 continue
             if clicked and rect.collidepoint(mouse_pos):
                 index = i
-            art = figure_art(name,HERO_CONFIG[name]["image"],108,130)
+            art = figure_art(name, 108, 130)
             screen.blit(art, art.get_rect(midtop=(rect.centerx,rect.y+8)))
             label(screen,name,rect.centerx,rect.bottom-38,INK,center=True)
             small(screen,"新角色" if fresh else "碎片 +1",rect.x+34,rect.bottom-25,GILT)
@@ -1106,7 +1114,7 @@ def draw_summon(screen, items, timer, index, mouse_pos, clicked):
             screen.blit(card,card.get_rect(center=(center,342)))
     else:
         name, fresh = items[index]
-        art = figure_art(name,HERO_CONFIG[name]["image"],520,426)
+        art = figure_art(name, 520, 426)
         screen.blit(art, art.get_rect(midbottom=(center,532)))
         label(screen,name,center,549,GILT,True,True)
         small_text = rendered_label("新角色" if fresh else "碎片 +1", MUTED, True)
@@ -1146,7 +1154,7 @@ class TestPicker(DetailViewer):
             hero = None
             if not clear:
                 data = HERO_CONFIG[self.name]
-                hero = Character(self.name, data["image"], data["hp"], data["atk"], data["def"],
+                hero = Character(self.name, data["hp"], data["atk"], data["def"],
                                  data["tag"], data.get("skill"), data.get("skills"))
                 hero.level, hero.star = level, star
                 hero.reset_battle_state()
@@ -1197,7 +1205,7 @@ class TestPicker(DetailViewer):
         self.close_button.draw(screen, mouse_pos)
         for name, rect in self.cards.items():
             glass(screen,rect)
-            art = figure_art(name,HERO_CONFIG[name]["image"],106,48)
+            art = figure_art(name, 106, 48)
             screen.blit(art,art.get_rect(midtop=(rect.centerx,rect.top+5)))
             label(screen,name,rect.centerx,rect.bottom-16,INK,center=True)
             if name == self.name:

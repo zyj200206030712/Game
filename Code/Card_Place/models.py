@@ -8,12 +8,8 @@ from config import HERO_CONFIG, STAGE_CONFIG
 SAVE_PATH = Path(__file__).with_name("save_data.json")
 
 class Character:
-    def __init__(self, name, image_file, base_hp, base_atk, base_def, tag="普通", skill=None, skills=None):
+    def __init__(self, name, base_hp, base_atk, base_def, tag="普通", skill=None, skills=None):
         self.name = name
-        # 创建角色时再加载头像，允许界面模块直接引用角色类。
-        from ui import load_portrait
-        self.image = load_portrait(name, image_file)
-        self.image_file = image_file
         self.level, self.star, self.duplicates = 1, 1, 0
         self.base_hp, self.base_atk, self.base_def = base_hp, base_atk, base_def
         self.tag = tag 
@@ -182,10 +178,9 @@ class GameData:
                 hero.duplicates += 1
                 return False
                 
-        stats = HERO_CONFIG.get(name, {"image": f"picture/{name}.png", "hp": 50, "atk": 50, "def": 50, "tag": "普通"})
+        stats = HERO_CONFIG.get(name, {"hp": 50, "atk": 50, "def": 50, "tag": "普通"})
         hero = Character(
             name,
-            stats["image"],
             stats["hp"],
             stats["atk"],
             stats["def"],
@@ -205,7 +200,7 @@ class GameData:
         name = self.selected_name
         if name not in self.previews:
             data = HERO_CONFIG[name]
-            self.previews[name] = Character(name, data["image"], data["hp"], data["atk"],
+            self.previews[name] = Character(name, data["hp"], data["atk"],
                                            data["def"], data["tag"], data.get("skill"), data.get("skills"))
         return self.previews[name]
 
